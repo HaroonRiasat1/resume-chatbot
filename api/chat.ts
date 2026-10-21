@@ -1,9 +1,10 @@
 // POST /api/chat: answers one question about Haroon through a free OpenRouter model.
 // The API key stays on the server, and the server builds the prompt itself, so the
 // endpoint can't be used as a general-purpose free LLM.
-import { DONT_KNOW, OFF_TOPIC, parseChunks, retrieve, route } from "../src/retrieve.js";
+import { DONT_KNOW, OFF_TOPIC, parseChunks, retrieve, route, type Chunk } from "../src/retrieve.js";
 import { systemPrompt } from "../src/prompt.js";
 import { resumeMarkdown } from "../src/profile.js";
+import { semanticSearch } from "./_lib/vector.js";
 
 const resume = resumeMarkdown();
 const chunks = parseChunks(resume);
@@ -20,12 +21,22 @@ interface Turn {
   content: string;
 }
 
+// Upstash scores are cosine similarity mapped to 0..1. A question at least this close
+// to some resume line is treated as answerable even when no keyword matches.
+// Tuned with scripts/eval-retrieval.ts: short resume lines make off-resume questions
+// ("Has he worked at Google?") score up to ~0.71, so only clearly closer matches count.
+const MIN_SCORE = Number(process.env.VECTOR_MIN_SCORE ?? 0.74);
+// Context keeps lines scoring within this distance of the best match.
+const SCORE_WINDOW = 0.06;
+
 // Free models allow ~50 requests a day per key, so repeat first questions
 // (the starter chips, mostly) are answered from memory while the instance is warm.
-const cache = new Map<string, string>();
+const cache = new Map<string, { answer: string; sources: string }>();
 
-function text(body: string, status = 200): Response {
-  return new Response(body, { status, headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" } });
+function text(body: string, extra: Record<string, string> = {}): Response {
+  return new Response(body, {
+    headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store", ...extra },
+  });
 }
 
 function parseBody(body: unknown): { question: string; history: Turn[] } | null {
@@ -43,12 +54,33 @@ function parseBody(body: unknown): { question: string; history: Turn[] } | null 
   return { question: question.trim(), history: turns };
 }
 
-// Follow-ups like "tell me more about the second one" lean on the previous question.
-function relevantLines(question: string, history: Turn[]) {
-  const hits = retrieve(question, chunks);
+interface Context {
+  lines: Chunk[];
+  answerable: boolean;
+  mode: "vector" | "keyword";
+}
+
+const dedupe = (lines: Chunk[]) => [...new Map(lines.map((c) => [c.text, c])).values()];
+
+// Hybrid retrieval: semantic search in Upstash Vector plus the keyword matcher.
+// Keyword hits are always kept, so exact names ("Exitech") never get lost.
+async function retrieveContext(question: string, history: Turn[]): Promise<Context> {
+  const keyword = retrieve(question, chunks);
+  // Follow-ups like "tell me more about the second one" lean on the previous question.
   const previous = history.findLast((t) => t.role === "user")?.content;
-  if (hits.length >= 2 || !previous) return hits;
-  return [...new Set([...hits, ...retrieve(previous, chunks)])];
+  const semantic = await semanticSearch(previous ? `${previous}\n${question}` : question);
+
+  if (!semantic) {
+    const lines = keyword.length >= 2 || !previous ? keyword : dedupe([...keyword, ...retrieve(previous, chunks)]);
+    return { lines, answerable: route(question, chunks) === "answer", mode: "keyword" };
+  }
+  const best = semantic[0]?.score ?? 0;
+  const close = semantic.filter((h) => h.score >= Math.max(MIN_SCORE - 0.05, best - SCORE_WINDOW)).map((h) => h.chunk);
+  return {
+    lines: dedupe([...keyword, ...close]).slice(0, 8),
+    answerable: route(question, chunks) === "answer" || best >= MIN_SCORE,
+    mode: "vector",
+  };
 }
 
 export async function POST(request: Request): Promise<Response> {
@@ -60,12 +92,17 @@ export async function POST(request: Request): Promise<Response> {
   const { question, history } = parsed;
 
   const r = route(question, chunks);
-  if (r === "private" || r === "unknown") return text(DONT_KNOW);
+  if (r === "private") return text(DONT_KNOW);
   if (r === "off-topic") return text(OFF_TOPIC);
 
   const cacheKey = history.length ? "" : question.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
   const cached = cacheKey && cache.get(cacheKey);
-  if (cached) return text(cached);
+  if (cached) return text(cached.answer, { "X-Sources": cached.sources });
+
+  const context = await retrieveContext(question, history);
+  if (!context.answerable) return text(DONT_KNOW, { "X-Retrieval": context.mode });
+  // Section names of the lines the answer is grounded in, for the "Sources" row in the UI.
+  const sources = encodeURIComponent(JSON.stringify([...new Set(context.lines.map((c) => c.section))]));
 
   const upstream = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
@@ -78,7 +115,7 @@ export async function POST(request: Request): Promise<Response> {
     body: JSON.stringify({
       models: MODELS,
       messages: [
-        { role: "system", content: systemPrompt(resume, relevantLines(question, history)) },
+        { role: "system", content: systemPrompt(resume, context.lines) },
         ...history,
         { role: "user", content: question },
       ],
@@ -126,9 +163,11 @@ export async function POST(request: Request): Promise<Response> {
         }
       },
       flush() {
-        if (cacheKey && complete && answer.trim()) cache.set(cacheKey, answer);
+        if (cacheKey && complete && answer.trim()) cache.set(cacheKey, { answer, sources });
       },
     }),
   );
-  return new Response(stream, { headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" } });
+  return new Response(stream, {
+    headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store", "X-Sources": sources, "X-Retrieval": context.mode },
+  });
 }

@@ -27,7 +27,14 @@ function apiDevServer(): Plugin {
 }
 
 export default defineConfig(({ mode }) => {
-  Object.assign(process.env, loadEnv(mode, process.cwd(), ""));
+  // loadEnv lets existing process.env values win, so clear the ones a previous
+  // config load set; otherwise edits to .env.local are ignored after a restart.
+  const g = globalThis as { __apiEnvKeys?: string[] };
+  for (const key of g.__apiEnvKeys ?? []) delete process.env[key];
+  const env = loadEnv(mode, process.cwd(), "");
+  const added = Object.keys(env).filter((k) => !(k in process.env));
+  Object.assign(process.env, Object.fromEntries(added.map((k) => [k, env[k]])));
+  g.__apiEnvKeys = added;
   return {
     server: { port: 5190 },
     plugins: [apiDevServer()],

@@ -7,12 +7,17 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "test": "tsx --test tests/*.test.ts"
+    "test": "tsx --test tests/*.test.ts",
+    "ingest": "tsx --env-file-if-exists=.env.local scripts/ingest.ts",
+    "vercel-build": "npm run ingest && npm run build"
   },
   "devDependencies": {
     "@types/node": "^22.20.5",
     "tsx": "^4.23.15",
     "typescript": "5.9",
     "vite": "^8.3.5"
+  },
+  "dependencies": {
+    "@upstash/vector": "^1.2.3"
   }
 }

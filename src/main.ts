@@ -77,6 +77,7 @@ async function answerWithModel(question: string, el: HTMLElement) {
     return;
   }
 
+  const sources = parseSources(res.headers.get("X-Sources"));
   let text = "";
   const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
   for (;;) {
@@ -93,6 +94,32 @@ async function answerWithModel(question: string, el: HTMLElement) {
     return;
   }
   history.push({ role: "user", content: question }, { role: "assistant", content: text });
+  if (sources.length && !/I don't know|I can only answer/.test(text)) addSources(el, sources, res.headers.get("X-Retrieval"));
+}
+
+function parseSources(header: string | null): string[] {
+  try {
+    const list = JSON.parse(decodeURIComponent(header ?? "[]"));
+    return Array.isArray(list) ? list.filter((s): s is string => typeof s === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+// RAG transparency: which parts of the resume the answer was grounded in.
+function addSources(el: HTMLElement, sources: string[], mode: string | null) {
+  const row = document.createElement("div");
+  row.className = "sources";
+  const label = document.createElement("span");
+  label.textContent = mode === "vector" ? "Sources · vector search" : "Sources";
+  row.append(label);
+  for (const s of sources) {
+    const chip = document.createElement("span");
+    chip.className = "src";
+    chip.textContent = s;
+    row.append(chip);
+  }
+  el.querySelector(".body")!.append(row);
 }
 
 async function run(task: () => Promise<void> | void) {
@@ -111,10 +138,11 @@ function ask(question: string) {
   input.value = "";
   return run(async () => {
     addUser(question);
-    // The server applies the same routing; checking here too answers instantly.
+    // Private and off-topic questions are answered here instantly. Everything else goes
+    // to the server, whose vector search decides whether the resume covers it.
     const r = route(question, chunks);
-    const el = addBot(r === "off-topic" ? OFF_TOPIC : r === "answer" ? "" : DONT_KNOW);
-    if (r === "answer") await answerWithModel(question, el);
+    const el = addBot(r === "off-topic" ? OFF_TOPIC : r === "private" ? DONT_KNOW : "");
+    if (r !== "off-topic" && r !== "private") await answerWithModel(question, el);
   });
 }
 

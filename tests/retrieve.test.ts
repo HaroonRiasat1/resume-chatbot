@@ -58,3 +58,12 @@ test("section-level questions reach the model", () => {
 test("personal trivia is refused without the model", () => {
   assert.equal(route("What's his favorite movie?", chunks), "private");
 });
+
+test("paraphrases found while tuning vector search", () => {
+  for (const q of [
+    "Where did he go to uni?",
+    "Has he managed people?",
+    "Has he built anything with speech-to-text?",
+    "Does he have experience with vector databases?",
+  ]) assert.equal(route(q, chunks), "answer", q);
+});
