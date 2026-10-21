@@ -258,6 +258,7 @@ body.chatting .thread { display: block; }
 .theme-map { background: linear-gradient(160deg, #065f46, #10b981); }
 .theme-trip { background: linear-gradient(160deg, #0369a1, #38bdf8); }
 .theme-runner { background: linear-gradient(160deg, #c2410c, #fb923c); }
+.theme-rag { background: linear-gradient(160deg, #4f46e5, #a855f7 60%, #ec4899); }
 .theme-scrub { background: linear-gradient(160deg, #312e81, #6366f1); }
 
 /* experience timeline */

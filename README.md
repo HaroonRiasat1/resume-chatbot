@@ -2,6 +2,8 @@
 
 A small public chatbot that answers questions about [Haroon Riasat](https://github.com/HaroonRiasat1): his experience, projects, skills, and education. Visitors open a link and start asking, with nothing to install.
 
+**Try it live: [resume-chatbot-chi.vercel.app](https://resume-chatbot-chi.vercel.app)**
+
 ## How it works
 
 - **Free open-source models through OpenRouter.** A Vercel serverless function ([`api/chat.ts`](api/chat.ts)) calls OpenRouter's free tier. It tries MiniMax M3.1 Flash first, then Gemma 4 31B, then Nemotron 3.5 Lightning when one is rate-limited. The API key lives only on the server.

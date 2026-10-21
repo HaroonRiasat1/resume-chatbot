@@ -69,6 +69,15 @@ export const profile = {
       theme: "council",
     },
     {
+      name: "resume-chatbot",
+      kind: "Personal project",
+      text: "Chat with Haroon's resume (this site): a RAG assistant grounded only in his public profile. Hybrid semantic + keyword retrieval over Upstash Vector, free open-source LLMs via OpenRouter, answers that cite their resume sections, and guards that say \"I don't know\" instead of guessing.",
+      tech: ["TypeScript", "Vite", "Vercel Functions", "Upstash Vector", "OpenRouter"],
+      repo: "https://github.com/HaroonRiasat1/resume-chatbot",
+      demo: "https://resume-chatbot-chi.vercel.app",
+      theme: "rag",
+    },
+    {
       name: "event-map-scraper",
       kind: "Personal project",
       text: "Search any city and scrape the map for nearby venues, festivals, and live events, with no API key required.",
