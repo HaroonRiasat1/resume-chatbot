@@ -15,6 +15,8 @@ export interface Hit {
 }
 
 let index: Index<ChunkMeta> | null | undefined;
+// Why the last search fell back to keywords, reported in the X-Retrieval header for debugging deploys.
+export let fallbackReason: "not-configured" | "error" | null = null;
 
 // Returns null when the env vars aren't set, so the app falls back to keyword search.
 export function vectorIndex(): Index<ChunkMeta> | null {
@@ -31,14 +33,19 @@ export const chunkText = (c: Chunk) => `${c.section}: ${c.text}`;
 
 export async function semanticSearch(question: string, topK = 6): Promise<Hit[] | null> {
   const idx = vectorIndex();
-  if (!idx) return null;
+  if (!idx) {
+    fallbackReason = "not-configured";
+    return null;
+  }
   try {
     const results = await idx.query({ data: question, topK, includeMetadata: true });
+    fallbackReason = null;
     return results
       .filter((r) => r.metadata)
       .map((r) => ({ chunk: { section: r.metadata!.section, text: r.metadata!.text }, score: r.score }));
   } catch (err) {
     console.error("vector search failed, using keyword search", err);
+    fallbackReason = "error";
     return null;
   }
 }

@@ -4,7 +4,7 @@
 import { DONT_KNOW, OFF_TOPIC, parseChunks, retrieve, route, type Chunk } from "../src/retrieve.js";
 import { systemPrompt } from "../src/prompt.js";
 import { resumeMarkdown } from "../src/profile.js";
-import { semanticSearch } from "./_lib/vector.js";
+import { fallbackReason, semanticSearch } from "./_lib/vector.js";
 
 const resume = resumeMarkdown();
 const chunks = parseChunks(resume);
@@ -57,7 +57,7 @@ function parseBody(body: unknown): { question: string; history: Turn[] } | null 
 interface Context {
   lines: Chunk[];
   answerable: boolean;
-  mode: "vector" | "keyword";
+  mode: "vector" | `keyword${string}`;
 }
 
 const dedupe = (lines: Chunk[]) => [...new Map(lines.map((c) => [c.text, c])).values()];
@@ -72,7 +72,7 @@ async function retrieveContext(question: string, history: Turn[]): Promise<Conte
 
   if (!semantic) {
     const lines = keyword.length >= 2 || !previous ? keyword : dedupe([...keyword, ...retrieve(previous, chunks)]);
-    return { lines, answerable: route(question, chunks) === "answer", mode: "keyword" };
+    return { lines, answerable: route(question, chunks) === "answer", mode: `keyword (vector ${fallbackReason})` };
   }
   const best = semantic[0]?.score ?? 0;
   const close = semantic.filter((h) => h.score >= Math.max(MIN_SCORE - 0.05, best - SCORE_WINDOW)).map((h) => h.chunk);
