@@ -4,42 +4,76 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Ask about Haroon Riasat</title>
-    <meta name="description" content="Chat with an AI assistant that answers questions about Haroon Riasat's experience, projects, and skills. Runs entirely in your browser." />
-    <meta name="theme-color" content="#0f766e" />
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='16' fill='%230f766e'/><text x='50%' y='54%' dominant-baseline='middle' text-anchor='middle' font-family='system-ui,sans-serif' font-size='28' font-weight='700' fill='white'>HR</text></svg>" />
+    <meta name="description" content="Chat with an AI assistant that answers questions about Haroon Riasat's experience, projects, and skills, grounded only in his resume." />
+    <meta name="theme-color" content="#07090d" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='16' fill='%2307090d'/><text x='50%' y='56%' dominant-baseline='middle' text-anchor='middle' font-family='Georgia,serif' font-style='italic' font-size='34' fill='%235eead4'>H</text></svg>" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
   </head>
   <body>
-    <div class="app">
-      <header class="header">
-        <div class="avatar" aria-hidden="true">HR</div>
-        <div class="who">
-          <h1>Haroon Riasat</h1>
-          <p>Full-Stack Software Engineer<span class="wide"> · AWS Cloud &amp; AI</span> · Turku, Finland</p>
+    <div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="grain" aria-hidden="true"></div>
+
+    <div class="page">
+      <section class="hero" id="hero">
+        <p class="eyebrow"><span class="pulse"></span>AI resume · online</p>
+        <h1>Ask me anything about <em>Haroon.</em></h1>
+        <p class="lede">
+          Full-stack engineer in Turku, Finland, building web, mobile and AI products on AWS.
+          This assistant answers from his resume only, and says so when it doesn't know.
+        </p>
+
+        <dl class="stats">
+          <div><dt>4.5+</dt><dd>years shipping production software</dd></div>
+          <div><dt>60+</dt><dd>products delivered at Exitech</dd></div>
+          <div><dt>6</dt><dd>engineers led at QUEST I-8</dd></div>
+          <div><dt>M.Sc.</dt><dd>Åbo Akademi, Jun 2026</dd></div>
+        </dl>
+
+        <div class="ticker" aria-label="Tech stack">
+          <div class="track">
+            <span>AWS</span><span>Bedrock</span><span>SageMaker</span><span>RAG</span><span>LangChain</span><span>OpenAI</span><span>Claude</span><span>React</span><span>Next.js</span><span>TypeScript</span><span>Node.js</span><span>Python</span><span>Flask</span><span>React Native</span><span>Swift</span><span>PostgreSQL</span><span>pgvector</span><span>Docker</span>
+          </div>
         </div>
+
         <nav class="links" aria-label="Contact">
-          <a href="mailto:haroonriasatali@gmail.com" title="Email" aria-label="Email">
+          <a class="primary" href="mailto:haroonriasatali@gmail.com">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18v14H3z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m3 6 9 7 9-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+            Email
           </a>
-          <a href="https://linkedin.com/in/haroon-riasat-82659b1a7" target="_blank" rel="noopener" title="LinkedIn" aria-label="LinkedIn">
+          <a href="https://linkedin.com/in/haroon-riasat-82659b1a7" target="_blank" rel="noopener">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5ZM3 9.75h4v11H3zm6.5 0h3.8v1.6h.06c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.77 2.6 4.77 6v5.45h-4v-4.83c0-1.15-.02-2.63-1.6-2.63-1.6 0-1.85 1.25-1.85 2.55v4.91h-4z"/></svg>
+            LinkedIn
           </a>
-          <a href="https://github.com/HaroonRiasat1" target="_blank" rel="noopener" title="GitHub" aria-label="GitHub">
+          <a href="https://github.com/HaroonRiasat1" target="_blank" rel="noopener">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.58 9.58 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.75c0 .27.18.58.69.48A10 10 0 0 0 12 2Z"/></svg>
+            GitHub
           </a>
         </nav>
-      </header>
+      </section>
 
-      <main class="chat" id="chat" aria-live="polite"></main>
+      <section class="panel" aria-label="Chat">
+        <header class="panel-head">
+          <div class="avatar" aria-hidden="true">H</div>
+          <div>
+            <strong>Haroon's assistant</strong>
+            <span><i class="dot"></i>Answers only from his resume</span>
+          </div>
+        </header>
 
-      <section class="composer">
-        <div class="starters" id="starters"></div>
-        <form id="form" autocomplete="off">
-          <input id="input" type="text" maxlength="400" placeholder="Ask about Haroon's experience, projects, skills…" aria-label="Your question" />
-          <button id="send" type="submit" aria-label="Send">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12 20 4l-6 16-2.5-6.5z" fill="currentColor"/></svg>
-          </button>
-        </form>
-        <div class="status" id="status"></div>
+        <main class="chat" id="chat" aria-live="polite"></main>
+
+        <div class="composer">
+          <div class="starters" id="starters"></div>
+          <form id="form" autocomplete="off">
+            <input id="input" type="text" maxlength="400" placeholder="Ask about his experience, projects, skills…" aria-label="Your question" />
+            <button id="send" type="submit" aria-label="Send">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </form>
+          <p class="status" id="status"></p>
+        </div>
       </section>
     </div>
     <script type="module" src="/src/main.ts"></script>

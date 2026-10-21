@@ -5,12 +5,23 @@ import { renderMarkdown } from "./markdown.js";
 import { isGrounded } from "./grounding.js";
 
 const STARTERS = [
-  "What's his AWS experience?",
-  "Which AI projects has he built?",
-  "Where does he work now?",
-  "What's his education?",
-  "Tell me about wild-frequencies",
+  { label: "Cloud", question: "What's his AWS experience?" },
+  { label: "AI", question: "Which AI projects has he built?" },
+  { label: "Right now", question: "Where does he work now?" },
+  { label: "For fun", question: "Tell me about wild-frequencies" },
 ];
+
+// Offered as follow-up chips under answers, skipping anything already asked.
+const SUGGESTIONS = [
+  ...STARTERS.map((s) => s.question),
+  "Has he led a team?",
+  "What did he do at Exitech?",
+  "What's his education?",
+  "Does he build mobile apps?",
+  "Which side projects can I try live?",
+  "How can I contact him?",
+];
+const asked = new Set<string>();
 
 const INTRO =
   "Hi, I'm Haroon's AI assistant. Ask me about his experience, projects, skills, or education. " +
@@ -31,6 +42,9 @@ const history: { role: "user" | "assistant"; content: string }[] = [];
 function addMessage(role: "user" | "bot", text: string, tag?: string): HTMLElement {
   const el = document.createElement("div");
   el.className = `msg ${role}`;
+  if (role === "bot") {
+    el.innerHTML = '<div class="avatar" aria-hidden="true">H</div><div class="body"></div>';
+  }
   setMessage(el, text, tag);
   chat.append(el);
   chat.scrollTop = chat.scrollHeight;
@@ -38,18 +52,37 @@ function addMessage(role: "user" | "bot", text: string, tag?: string): HTMLEleme
 }
 
 function setMessage(el: HTMLElement, text: string, tag?: string) {
-  if (el.classList.contains("user")) el.textContent = text;
-  else el.innerHTML = renderMarkdown(text);
+  if (el.classList.contains("user")) {
+    el.textContent = text;
+    return;
+  }
+  const body = el.querySelector<HTMLElement>(".body")!;
+  body.innerHTML = text ? renderMarkdown(text) : '<span class="dots" aria-label="Typing"><i></i><i></i><i></i></span>';
   if (tag) {
     const t = document.createElement("span");
     t.className = "tag";
     t.textContent = tag;
-    el.append(t);
+    body.append(t);
   }
 }
 
+function addFollowups(el: HTMLElement) {
+  const next = SUGGESTIONS.filter((q) => !asked.has(q)).slice(0, 3);
+  if (!next.length) return;
+  const row = document.createElement("div");
+  row.className = "followups";
+  for (const q of next) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = q;
+    b.onclick = () => ask(q);
+    row.append(b);
+  }
+  el.querySelector(".body")!.append(row);
+  chat.scrollTop = chat.scrollHeight;
+}
+
 async function answerWithModel(question: string, el: HTMLElement) {
-  el.classList.add("typing");
   const res = await fetch("/api/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -57,7 +90,6 @@ async function answerWithModel(question: string, el: HTMLElement) {
   }).catch(() => null);
 
   if (!res?.ok || !res.body) {
-    el.classList.remove("typing");
     const tag =
       res?.status === 429
         ? "Quick answer: the free AI model is busy right now, so here are the resume lines"
@@ -75,8 +107,6 @@ async function answerWithModel(question: string, el: HTMLElement) {
     setMessage(el, text);
     chat.scrollTop = chat.scrollHeight;
   }
-  el.classList.remove("typing");
-
   if (!text.trim() || !isGrounded(text, resume, question)) {
     // Keep a drifted answer out of the history so later turns don't build on it.
     setMessage(el, quickAnswer(question, chunks), "Quick answer: the AI's reply went beyond the resume, so here are the resume lines");
@@ -90,15 +120,18 @@ async function ask(question: string) {
   if (!question || busy) return;
   busy = true;
   send.disabled = true;
+  asked.add(question);
   starters.replaceChildren();
+  document.body.classList.add("started");
+  chat.querySelectorAll(".followups").forEach((f) => f.remove());
   addMessage("user", question);
   input.value = "";
 
   // The server applies the same routing; checking here too answers instantly.
   const r = route(question, chunks);
-  if (r === "private" || r === "unknown") addMessage("bot", DONT_KNOW);
-  else if (r === "off-topic") addMessage("bot", OFF_TOPIC);
-  else await answerWithModel(question, addMessage("bot", ""));
+  const el = addMessage("bot", r === "off-topic" ? OFF_TOPIC : r === "answer" ? "" : DONT_KNOW);
+  if (r === "answer") await answerWithModel(question, el);
+  addFollowups(el);
 
   busy = false;
   send.disabled = false;
@@ -110,16 +143,22 @@ form.addEventListener("submit", (e) => {
   ask(input.value);
 });
 
-for (const q of STARTERS) {
+for (const { label, question } of STARTERS) {
   const b = document.createElement("button");
   b.type = "button";
-  b.textContent = q;
-  b.onclick = () => ask(q);
+  const tag = document.createElement("span");
+  tag.textContent = label;
+  b.append(tag, question);
+  b.onclick = () => ask(question);
   starters.append(b);
 }
 
+// Duplicate the stack ticker so its -50% scroll loops seamlessly.
+const track = document.querySelector<HTMLElement>(".track");
+if (track) track.innerHTML += track.innerHTML;
+
 addMessage("bot", INTRO);
-status.textContent = "Answers come from an open-source AI model and are grounded only in Haroon's resume.";
+status.textContent = "Open-source AI · grounded only in Haroon's resume";
 
 // Handy for debugging in the console.
 Object.assign(window, { resumeChat: { ask } });

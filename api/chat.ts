@@ -85,8 +85,9 @@ export async function POST(request: Request): Promise<Response> {
       ],
       stream: true,
       temperature: 0.1,
-      max_tokens: 400,
-      reasoning: { exclude: true },
+      // Reasoning models spend part of this budget thinking, so leave plenty of room for the answer.
+      max_tokens: 1200,
+      reasoning: { effort: "low", exclude: true },
     }),
   }).catch(() => null);
 
@@ -101,6 +102,7 @@ export async function POST(request: Request): Promise<Response> {
   const encoder = new TextEncoder();
   let buffer = "";
   let answer = "";
+  let complete = false;
   const stream = upstream.body.pipeThrough(
     new TransformStream<Uint8Array, Uint8Array>({
       transform(chunk, controller) {
@@ -110,7 +112,11 @@ export async function POST(request: Request): Promise<Response> {
         for (const line of lines) {
           if (!line.startsWith("data: ") || line === "data: [DONE]") continue;
           try {
-            const delta: string = JSON.parse(line.slice(6)).choices?.[0]?.delta?.content ?? "";
+            const event = JSON.parse(line.slice(6));
+            const finish = event.choices?.[0]?.finish_reason;
+            if (finish === "stop") complete = true;
+            else if (event.error || finish) console.error("openrouter stream ended early", finish, event.error ?? "");
+            const delta: string = event.choices?.[0]?.delta?.content ?? "";
             if (delta) {
               answer += delta;
               controller.enqueue(encoder.encode(delta));
@@ -121,7 +127,7 @@ export async function POST(request: Request): Promise<Response> {
         }
       },
       flush() {
-        if (cacheKey && answer.trim()) cache.set(cacheKey, answer);
+        if (cacheKey && complete && answer.trim()) cache.set(cacheKey, answer);
       },
     }),
   );
