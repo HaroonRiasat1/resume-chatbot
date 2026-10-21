@@ -51,6 +51,9 @@ const SYNONYMS: Record<string, string[]> = {
   currently: ["present"],
   now: ["present"],
   study: ["education", "university"],
+  graduate: ["education", "m.sc"],
+  graduation: ["education", "m.sc"],
+  skill: ["stack"],
   studied: ["education", "university"],
   degree: ["education", "m.sc", "b.sc"],
   university: ["education"],
@@ -116,7 +119,8 @@ export function retrieve(question: string, chunks: Chunk[], limit = 5): Chunk[] 
         score += weight(q) * (1 + 0.15 * related);
       }      else {
         const syn = SYNONYMS[q]?.find((s) => hits(doc, s) || doc.section.includes(s));
-        score += Math.max(doc.section.includes(stem(q)) ? 0.25 * weight(q) : 0, syn ? 0.6 * weight(syn) : 0);
+        // Naming a section ("education", "skills") matches every line in it.
+        score += Math.max(doc.section.includes(stem(q)) ? weight(q) : 0, syn ? 0.6 * weight(syn) : 0);
       }
     }
     return { chunk: doc.chunk, score };
@@ -132,7 +136,7 @@ export function retrieve(question: string, chunks: Chunk[], limit = 5): Chunk[] 
 
 // Personal details that are never in the resume. Refuse these up front instead
 // of letting a keyword ("phone" -> "phones") or a small model drift into a guess.
-const PRIVATE = /\b(salary|salaries|pay|paid|earn|earns|income|rate|phone|number|address|age|old|birthday|born|married|wife|husband|girlfriend|boyfriend|kids|children|religion|politic\w*|visa|passport|ssn|weight|height|nationality)\b/i;
+const PRIVATE = /\b(salary|salaries|pay|paid|earn|earns|income|rate|phone|number|address|age|old|birthday|born|married|wife|husband|girlfriend|boyfriend|kids|children|religion|politic\w*|visa|passport|ssn|weight|height|nationality|favou?rite|hobby|hobbies)\b/i;
 
 export function isPrivateQuestion(question: string): boolean {
   return PRIVATE.test(question) && !/\b(projects?|years of experience|team)\b/i.test(question);

@@ -1,5 +1,5 @@
 {
   "functions": {
-    "api/chat.ts": { "includeFiles": "src/resume.md", "maxDuration": 30 }
+    "api/chat.ts": { "maxDuration": 30 }
   }
 }

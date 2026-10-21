@@ -1,12 +1,11 @@
 // POST /api/chat: answers one question about Haroon through a free OpenRouter model.
 // The API key stays on the server, and the server builds the prompt itself, so the
 // endpoint can't be used as a general-purpose free LLM.
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { DONT_KNOW, OFF_TOPIC, parseChunks, retrieve, route } from "../src/retrieve.js";
 import { systemPrompt } from "../src/prompt.js";
+import { resumeMarkdown } from "../src/profile.js";
 
-const resume = readFileSync(join(process.cwd(), "src/resume.md"), "utf8");
+const resume = resumeMarkdown();
 const chunks = parseChunks(resume);
 
 // Tried in order; OpenRouter falls through to the next when one is rate-limited or down.

@@ -1,9 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { resumeMarkdown } from "../src/profile.js";
 import { parseChunks, quickAnswer, retrieve, route } from "../src/retrieve.js";
 
-const chunks = parseChunks(readFileSync(new URL("../src/resume.md", import.meta.url), "utf8"));
+const chunks = parseChunks(resumeMarkdown());
 const sections = (q: string) => retrieve(q, chunks).map((c) => c.section);
 
 test("AWS questions hit stack and certification", () => {
@@ -41,4 +41,20 @@ test("routing keeps the model to plausible resume questions", () => {
   assert.equal(r("What's his background?"), "answer");
   assert.equal(r("Who is Haroon?"), "answer");
   assert.equal(r("How can I contact him?"), "answer");
+});
+
+test("section-level questions reach the model", () => {
+  for (const q of [
+    "What's his education?",
+    "Education?",
+    "What certifications does he have?",
+    "What's his experience?",
+    "What are his skills?",
+    "When does he graduate?",
+  ]) assert.equal(route(q, chunks), "answer", q);
+  assert.ok(sections("What's his education?").includes("Education"));
+});
+
+test("personal trivia is refused without the model", () => {
+  assert.equal(route("What's his favorite movie?", chunks), "private");
 });

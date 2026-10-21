@@ -1,9 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { resumeMarkdown } from "../src/profile.js";
 import { isGrounded } from "../src/grounding.js";
 
-const resume = readFileSync(new URL("../src/resume.md", import.meta.url), "utf8");
+const resume = resumeMarkdown();
 
 test("faithful answers pass", () => {
   for (const a of [
