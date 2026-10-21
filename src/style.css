@@ -1,0 +1,226 @@
+:root {
+  --bg: #f4f6f5;
+  --surface: #ffffff;
+  --text: #17201e;
+  --muted: #5d6b68;
+  --border: #dfe5e3;
+  --accent: #0f766e;
+  --accent-text: #ffffff;
+  --bot: #ffffff;
+  --user: #0f766e;
+  --chip: #e8f2f0;
+  --chip-text: #0b5b55;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1413;
+    --surface: #171e1d;
+    --text: #e6eeec;
+    --muted: #93a39f;
+    --border: #2a3533;
+    --accent: #2dd4bf;
+    --accent-text: #062a26;
+    --bot: #1c2524;
+    --user: #14695f;
+    --chip: #1d2c2a;
+    --chip-text: #8fe3d6;
+    color-scheme: dark;
+  }
+}
+
+* { box-sizing: border-box; }
+
+html, body { height: 100%; margin: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.avatar {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-weight: 700;
+}
+
+.who { min-width: 0; flex: 1; }
+.who h1 { margin: 0; font-size: 17px; white-space: nowrap; }
+.who p { margin: 0; color: var(--muted); font-size: 13px; }
+
+.links { display: flex; gap: 4px; }
+.links a {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  color: var(--muted);
+}
+.links a:hover { background: var(--chip); color: var(--chip-text); }
+.links svg { width: 20px; height: 20px; }
+
+.chat {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px 16px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.msg {
+  max-width: 85%;
+  padding: 10px 14px;
+  border-radius: 16px;
+  overflow-wrap: anywhere;
+}
+.msg p { margin: 0 0 6px; }
+.msg p:last-child, .msg ul:last-child { margin-bottom: 0; }
+.msg ul { margin: 4px 0 6px; padding-left: 20px; }
+.msg a { color: inherit; }
+
+.msg.bot {
+  align-self: flex-start;
+  background: var(--bot);
+  border: 1px solid var(--border);
+  border-bottom-left-radius: 4px;
+}
+.msg.bot a { color: var(--accent); }
+
+.msg.user {
+  align-self: flex-end;
+  background: var(--user);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.msg .tag {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.typing::after {
+  content: "▍";
+  animation: blink 1s steps(2) infinite;
+  color: var(--muted);
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+.composer {
+  padding: 8px 16px calc(12px + env(safe-area-inset-bottom));
+  background: var(--bg);
+}
+
+.starters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.starters:empty { display: none; }
+.starters button {
+  border: 1px solid transparent;
+  background: var(--chip);
+  color: var(--chip-text);
+  border-radius: 999px;
+  padding: 7px 12px;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.starters button:hover { border-color: var(--chip-text); }
+
+form {
+  display: flex;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 6px;
+}
+form:focus-within { border-color: var(--accent); }
+
+input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 16px; /* avoids iOS zoom on focus */
+  padding: 6px 8px;
+}
+
+#send {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--accent);
+  color: var(--accent-text);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+#send:disabled { opacity: 0.5; cursor: default; }
+#send svg { width: 18px; height: 18px; }
+
+.status {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.status button {
+  font: inherit;
+  font-size: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 3px 8px;
+  cursor: pointer;
+}
+
+@media (max-width: 480px) {
+  .header { gap: 10px; padding: 12px; }
+  .avatar { width: 38px; height: 38px; font-size: 14px; }
+  .who p { font-size: 12px; line-height: 1.35; }
+  .who .wide { display: none; }
+  .links { gap: 0; }
+  .links a { width: 32px; }
+  .msg { max-width: 92%; }
+}
