@@ -9,6 +9,7 @@ export const profile = {
   location: "Turku, Finland",
   summary: [
     "Full-stack engineer with 4.5+ years designing, building, and deploying production web, mobile, and AI-powered applications end to end. Hands-on with AWS (EC2, S3, Amplify, Bedrock, SageMaker) and LLM/RAG systems (OpenAI, Claude, Gemini, LangChain, LlamaIndex, Pinecone, pgvector, Chroma).",
+    "He completed his M.Sc. in Information Technology at Åbo Akademi University in Turku, Finland, in June 2026 (GPA 4.7/5.0), after a B.Sc. in Computer Science from FAST-NUCES in Islamabad, Pakistan.",
     "Most of his recent work has been on NDA-covered client and employer projects, so his public GitHub activity is lighter than his actual output.",
   ],
   stats: [
@@ -256,7 +257,7 @@ export function resumeMarkdown(): string {
     "## Education",
     "",
     ...p.education.flatMap((e) => [
-      `- ${e.degree}, ${e.school}, ${e.place}. ${e.date}. ${e.grade}.`,
+      `- ${e.degree}, ${e.school}, ${e.place}. Graduated ${e.date}. ${e.grade}.`,
       ...e.details.map((d) => `- ${e.school} ${e.degree.split(" ")[0]}: ${d}`),
     ]),
     "",

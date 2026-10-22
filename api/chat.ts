@@ -1,7 +1,7 @@
 // POST /api/chat: answers one question about Haroon through a free OpenRouter model.
 // The API key stays on the server, and the server builds the prompt itself, so the
 // endpoint can't be used as a general-purpose free LLM.
-import { DONT_KNOW, OFF_TOPIC, parseChunks, retrieve, route, type Chunk } from "../src/retrieve.js";
+import { DONT_KNOW, OFF_TOPIC, parseChunks, retrieve, route, terms, type Chunk } from "../src/retrieve.js";
 import { systemPrompt } from "../src/prompt.js";
 import { resumeMarkdown } from "../src/profile.js";
 import { fallbackReason, semanticSearch } from "./_lib/vector.js";
@@ -76,8 +76,15 @@ async function retrieveContext(question: string, history: Turn[]): Promise<Conte
   }
   const best = semantic[0]?.score ?? 0;
   const close = semantic.filter((h) => h.score >= Math.max(MIN_SCORE - 0.05, best - SCORE_WINDOW)).map((h) => h.chunk);
+  // Broad questions ("Who is Haroon?", "Why hire him?") get the whole resume instead of a
+  // few loosely related lines. Without keywords, a high score usually just means the
+  // question shares his name with the Contact lines.
+  const broad = !terms(question).length || (!keyword.length && best < MIN_SCORE);
+  // Most relevant first: lines both searches agree on, then semantic order, then keyword-only.
+  const semanticTexts = new Set(close.map((c) => c.text));
+  const agreed = keyword.filter((k) => semanticTexts.has(k.text));
   return {
-    lines: dedupe([...keyword, ...close]).slice(0, 8),
+    lines: broad ? [] : dedupe([...agreed, ...close, ...keyword]).slice(0, 8),
     answerable: route(question, chunks) === "answer" || best >= MIN_SCORE,
     mode: "vector",
   };
@@ -102,7 +109,8 @@ export async function POST(request: Request): Promise<Response> {
   const context = await retrieveContext(question, history);
   if (!context.answerable) return text(DONT_KNOW, { "X-Retrieval": context.mode });
   // Section names of the lines the answer is grounded in, for the "Sources" row in the UI.
-  const sources = encodeURIComponent(JSON.stringify([...new Set(context.lines.map((c) => c.section))]));
+  // The three most relevant sections; empty when the whole resume was used.
+  const sources = encodeURIComponent(JSON.stringify([...new Set(context.lines.map((c) => c.section))].slice(0, 3)));
 
   const upstream = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",

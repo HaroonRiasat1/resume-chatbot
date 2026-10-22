@@ -3,12 +3,14 @@ import { DONT_KNOW, type Chunk } from "./retrieve.js";
 // With matching lines, the model sees only those lines: a small model given the
 // whole resume mixes up facts between entries (e.g. one project's stack on another).
 // Broad questions with no specific match get the full resume.
-export function systemPrompt(resume: string, relevant: Chunk[] = []): string {
+export function systemPrompt(resume: string, relevant: Chunk[] = [], today = new Date()): string {
   const source = relevant.length
     ? "Haroon Riasat, Full-Stack Software Engineer (AWS Cloud & AI), based in Turku, Finland.\n" +
       relevant.map((c) => `- [${c.section}] ${c.text}`).join("\n")
     : resume.trim();
   return `You are the AI assistant on Haroon Riasat's personal website. Visitors (often recruiters) ask you about Haroon's professional background. Answer using ONLY the facts in the RESUME section below.
+
+Today's date is ${today.toISOString().slice(0, 10)}. Use it to judge whether dated items (certifications, degrees, roles) are past, current, or expired, and never call something expired "valid".
 
 Rules:
 1. Every fact you state must appear in the RESUME. Never guess, infer, or add details (no salary, rates, phone number, age, address, family, opinions, or dates/companies that are not listed). If the question names a technology, company, or project that is not written in the RESUME, the answer is "I don't know".

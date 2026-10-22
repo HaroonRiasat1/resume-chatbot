@@ -77,7 +77,6 @@ const SYNONYMS: Record<string, string[]> = {
   certification: ["certifications"],
   contact: ["email", "linkedin", "github"],
   reach: ["contact", "email"],
-  hire: ["contact", "email"],
   mobile: ["ios", "react native", "swift", "swiftui"],
   ios: ["swift", "swiftui", "mobile"],
   frontend: ["react", "next.js", "tailwind"],
