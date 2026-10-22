@@ -164,6 +164,23 @@ export const profile = {
       theme: "runner",
     },
     {
+      name: "Sunridge Medical",
+      kind: "Work project",
+      text: "Healthcare iPad and iOS app for Sunridge Medical, delivered by Exitech over five months. Clinical workflows ran on manual processes and disconnected tools; the app brings a clinic's day into one place: dashboard and appointment calendar, today's patients, procedures, vitals, labs, dispensed items and treatment scheduling. He was one of four engineers and built the Today view, patient list, labs and dispensed modules, vendor labs and treatment scheduling.",
+      tech: ["Swift", "SwiftUI", "Combine", "REST APIs"],
+      demo: "https://exitech.org/work/sunridge-ios-app-48",
+      theme: "medical",
+    },
+    {
+      name: "Fridge",
+      kind: "University team project",
+      text: "Mobile app built by an Åbo Akademi University team that scans groceries to track expiry dates and suggests recipes, with a Flutter app and a Django REST backend on PostgreSQL (AWS RDS) and Firebase. ICT Showroom 2025 finalist: Best UI from the jury, plus first place for Best Technical Content and Best Presentation in the public vote.",
+      tech: ["Flutter", "Django", "PostgreSQL", "AWS RDS", "Firebase"],
+      repo: "https://github.com/HaroonRiasat1/fridge_flutter",
+      demo: "https://fridgelogic.lovable.app",
+      theme: "fridge",
+    },
+    {
       name: "SCRUB",
       kind: "Work project",
       text: "Custom sales-management app extending Salesforce, with a React/TypeScript frontend, Express/PostgreSQL backend and OAuth sign-in.",
@@ -187,6 +204,11 @@ export const profile = {
     { group: "Databases", items: ["PostgreSQL", "MongoDB", "SQL"] },
     { group: "Ways of working", items: ["Project management", "Scrum", "Jira", "Figma", "Software design", "UX"] },
     { group: "AI-assisted development", items: ["Claude", "GitHub Copilot", "ChatGPT (daily coding, review and debugging)"] },
+  ],
+  // Courses in progress. These are tools he is learning, not experience he has shipped.
+  learning: [
+    "AI FDE: The Forward Deployed Engineer & Agentic AI Architect (Ed Donner, Udemy), in progress: agent harnesses with LangGraph, LangChain Deep Agents and the Claude Agent SDK; evals and observability with Langfuse and LLM as a judge; agentic RAG over MCP with Qdrant and Supabase; deploying agents on AWS Bedrock AgentCore (Gateway, Memory, Cedar policies) and Lambda; local and open-weight models with Ollama and OpenRouter.",
+    "AI Engineer Production Track: Deploy LLMs & Agents at Scale (Ligency and Ed Donner, Udemy), in progress: shipping LLM apps and multi-agent systems to production on Vercel, AWS, Azure and GCP with FastAPI, Clerk, Lambda, CloudFront, API Gateway, SQS, App Runner, Aurora, AgentCore, Strands Agents, Terraform and GitHub Actions, Azure Container Apps and GCP Cloud Run.",
   ],
   education: [
     {
@@ -288,6 +310,10 @@ export function resumeMarkdown(): string {
       `- ${e.degree}, ${e.school}, ${e.place}. Graduated ${e.date}. ${e.grade}.`,
       ...e.details.map((d) => `- ${e.school} ${e.degree.split(" ")[0]}: ${d}`),
     ]),
+    "",
+    "## Currently learning (courses in progress)",
+    "",
+    ...p.learning.map((l) => `- ${l}`),
     "",
     "## Certifications",
     "",

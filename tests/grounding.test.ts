@@ -16,7 +16,7 @@ test("faithful answers pass", () => {
 
 test("invented answers fail", () => {
   for (const a of [
-    "Yes, Haroon knows Terraform and has deployed clusters on Google Cloud with Helm.",
+    "Yes, Haroon knows Elixir and has deployed clusters on Oracle Cloud with Helm and Pulumi.",
     "Sure! Here's a simple Python function to reverse a string: def reverse_string(s): return s[::-1]",
     "Council Tap uses AWS SageMaker to host a fine-tuned Whisper model and stores transcripts in DynamoDB, with a Lambda pipeline that emails summaries to judges every morning.",
     "The app will suggest nearby venues based on your interests. You can see what other users are doing at the same time. Budgeting tools allow you to set a daily budget and see where you're going to spend money.",

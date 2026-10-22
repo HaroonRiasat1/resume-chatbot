@@ -104,6 +104,14 @@ const SYNONYMS: Record<string, string[]> = {
   founder: ["co-founder", "co-founded"],
   startup: ["co-founder", "consultancy"],
   skills: ["stack"],
+  course: ["currently learning", "udemy"],
+  courses: ["currently learning", "udemy"],
+  learning: ["currently learning", "udemy"],
+  studying: ["currently learning", "udemy"],
+  medical: ["sunridge", "healthcare", "clinic"],
+  healthcare: ["sunridge", "clinic", "health"],
+  hospital: ["sunridge", "clinic"],
+  fridge: ["grocery", "groceries"],
   languages: ["typescript", "javascript", "python", "php", "c++", "assembly", "swift"],
 };
 
@@ -147,6 +155,10 @@ export function retrieve(question: string, chunks: Chunk[], limit = 5): Chunk[] 
         score += Math.max(doc.section.includes(stem(q)) ? weight(q) : 0, syn ? 0.6 * weight(syn) : 0);
       }
     }
+    // Course lines list many tools he is still learning; rank them below real
+    // experience unless the question is about courses.
+    const aboutCourses = query.some((q) => /^(course|courses|learning|studying|study|udemy|currently)$/.test(q));
+    if (doc.section.startsWith("currently learning") && !aboutCourses) score *= 0.5;
     return { chunk: doc.chunk, score };
   });
   const best = Math.max(0, ...scored.map((s) => s.score));

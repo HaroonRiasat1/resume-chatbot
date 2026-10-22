@@ -261,6 +261,8 @@ body.chatting .thread { display: block; }
 .theme-kinwell { background: linear-gradient(160deg, #0f766e, #14b8a6 55%, #fbbf24); }
 .theme-rag { background: linear-gradient(160deg, #4f46e5, #a855f7 60%, #ec4899); }
 .theme-scrub { background: linear-gradient(160deg, #312e81, #6366f1); }
+.theme-medical { background: linear-gradient(160deg, #0c4a6e, #0ea5e9 60%, #10b981); }
+.theme-fridge { background: linear-gradient(160deg, #9f1239, #fb7185); }
 
 /* experience timeline */
 .timeline { list-style: none; margin: 0; padding: 0; position: relative; }
