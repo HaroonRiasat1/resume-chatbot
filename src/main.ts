@@ -175,7 +175,7 @@ for (const c of CATEGORIES) {
 
 for (const el of document.querySelectorAll<HTMLElement>("[data-icon]")) el.innerHTML = icon(el.dataset.icon!).innerHTML;
 
-status.textContent = "Answers come only from Haroon's resume · open-source AI";
+status.textContent = "AI answers grounded only in Haroon's resume";
 
 // Handy for debugging in the console.
 Object.assign(window, { resumeChat: { ask, showCategory: (id: string) => showCategory(CATEGORIES.find((c) => c.id === id)!) } });

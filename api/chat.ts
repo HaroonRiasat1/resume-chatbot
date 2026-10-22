@@ -1,20 +1,14 @@
-// POST /api/chat: answers one question about Haroon through a free OpenRouter model.
-// The API key stays on the server, and the server builds the prompt itself, so the
-// endpoint can't be used as a general-purpose free LLM.
+// POST /api/chat: answers one question about Haroon through OpenAI (or OpenRouter's
+// free models as a fallback). API keys stay on the server, and the server builds the
+// prompt itself, so the endpoint can't be used as a general-purpose LLM.
 import { DONT_KNOW, OFF_TOPIC, parseChunks, retrieve, route, terms, type Chunk } from "../src/retrieve.js";
 import { systemPrompt } from "../src/prompt.js";
 import { resumeMarkdown } from "../src/profile.js";
 import { fallbackReason, semanticSearch } from "./_lib/vector.js";
+import { hasProvider, streamCompletion } from "./_lib/llm.js";
 
 const resume = resumeMarkdown();
 const chunks = parseChunks(resume);
-
-// Tried in order; OpenRouter falls through to the next when one is rate-limited or down.
-const MODELS = (process.env.OPENROUTER_MODELS ??
-  "minimax/minimax-m3.1-flash:free,google/gemma-4-31b-it:free,nvidia/nemotron-3.5-lightning:free")
-  .split(",")
-  .map((m) => m.trim())
-  .filter(Boolean);
 
 interface Turn {
   role: "user" | "assistant";
@@ -29,8 +23,8 @@ const MIN_SCORE = Number(process.env.VECTOR_MIN_SCORE ?? 0.74);
 // Context keeps lines scoring within this distance of the best match.
 const SCORE_WINDOW = 0.06;
 
-// Free models allow ~50 requests a day per key, so repeat first questions
-// (the starter chips, mostly) are answered from memory while the instance is warm.
+// Repeat first questions (the starter chips, mostly) are answered from memory while the
+// instance is warm, saving API cost and the free fallback's ~50 requests a day.
 const cache = new Map<string, { answer: string; sources: string }>();
 
 function text(body: string, extra: Record<string, string> = {}): Response {
@@ -91,8 +85,7 @@ async function retrieveContext(question: string, history: Turn[]): Promise<Conte
 }
 
 export async function POST(request: Request): Promise<Response> {
-  const key = process.env.OPENROUTER_API_KEY;
-  if (!key) return Response.json({ error: "not_configured" }, { status: 503 });
+  if (!hasProvider()) return Response.json({ error: "not_configured" }, { status: 503 });
 
   const parsed = parseBody(await request.json().catch(() => null));
   if (!parsed) return Response.json({ error: "bad_request" }, { status: 400 });
@@ -112,36 +105,16 @@ export async function POST(request: Request): Promise<Response> {
   // The three most relevant sections; empty when the whole resume was used.
   const sources = encodeURIComponent(JSON.stringify([...new Set(context.lines.map((c) => c.section))].slice(0, 3)));
 
-  const upstream = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${key}`,
-      "Content-Type": "application/json",
-      "HTTP-Referer": "https://github.com/HaroonRiasat1",
-      "X-Title": "Chat with Haroon's resume",
-    },
-    body: JSON.stringify({
-      models: MODELS,
-      messages: [
-        { role: "system", content: systemPrompt(resume, context.lines) },
-        ...history,
-        { role: "user", content: question },
-      ],
-      stream: true,
-      temperature: 0.1,
-      // Reasoning models spend part of this budget thinking, so leave plenty of room for the answer.
-      max_tokens: 1200,
-      reasoning: { effort: "low", exclude: true },
-    }),
-  }).catch(() => null);
-
-  if (!upstream?.ok || !upstream.body) {
-    const status = upstream?.status === 429 ? 429 : 502;
-    console.error("openrouter error", upstream?.status, await upstream?.text().catch(() => ""));
-    return Response.json({ error: status === 429 ? "rate_limited" : "upstream_error" }, { status });
+  const upstream = await streamCompletion([
+    { role: "system", content: systemPrompt(resume, context.lines) },
+    ...history,
+    { role: "user", content: question },
+  ]);
+  if (!upstream.ok) {
+    return Response.json({ error: upstream.status === 429 ? "rate_limited" : "upstream_error" }, { status: upstream.status });
   }
 
-  // Turn OpenRouter's server-sent events into a plain text stream of the answer.
+  // Turn the provider's server-sent events into a plain text stream of the answer.
   const decoder = new TextDecoder();
   const encoder = new TextEncoder();
   let buffer = "";
@@ -159,14 +132,14 @@ export async function POST(request: Request): Promise<Response> {
             const event = JSON.parse(line.slice(6));
             const finish = event.choices?.[0]?.finish_reason;
             if (finish === "stop") complete = true;
-            else if (event.error || finish) console.error("openrouter stream ended early", finish, event.error ?? "");
+            else if (event.error || finish) console.error("stream ended early", upstream.provider, finish, event.error ?? "");
             const delta: string = event.choices?.[0]?.delta?.content ?? "";
             if (delta) {
               answer += delta;
               controller.enqueue(encoder.encode(delta));
             }
           } catch {
-            // OpenRouter sends keep-alive comments and the odd partial line; skip them.
+            // Providers send keep-alive comments and the odd partial line; skip them.
           }
         }
       },
@@ -176,6 +149,6 @@ export async function POST(request: Request): Promise<Response> {
     }),
   );
   return new Response(stream, {
-    headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store", "X-Sources": sources, "X-Retrieval": context.mode },
+    headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store", "X-Sources": sources, "X-Retrieval": context.mode, "X-Model": upstream.provider },
   });
 }

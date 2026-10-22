@@ -6,7 +6,7 @@ A small public chatbot that answers questions about [Haroon Riasat](https://gith
 
 ## How it works
 
-- **Free open-source models through OpenRouter.** A Vercel serverless function ([`api/chat.ts`](api/chat.ts)) calls OpenRouter's free tier. It tries MiniMax M3.1 Flash first, then Gemma 4 31B, then Nemotron 3.5 Lightning when one is rate-limited. The API key lives only on the server.
+- **OpenAI first, free open-source models as fallback.** A Vercel serverless function ([`api/chat.ts`](api/chat.ts), [`api/_lib/llm.ts`](api/_lib/llm.ts)) calls OpenAI when `OPENAI_API_KEY` is set (model from `OPENAI_MODEL`). If OpenAI errors or is rate-limited, or no key is set, it falls back to OpenRouter's free tier (MiniMax M3.1 Flash, then Gemma 4 31B, then Nemotron 3.5 Lightning). Keys live only on the server; the `X-Model` response header shows which model answered.
 - **Answers come only from [`src/profile.ts`](src/profile.ts).** That file holds his public resume facts as data. The server builds the prompt itself.
 - **RAG with Upstash Vector.** Each resume line is stored in an [Upstash Vector](https://upstash.com/docs/vector) index, which embeds the text itself (`text-embedding-3-small`), so there's no separate embedding key. Each question runs a semantic search plus a keyword match; the closest lines become the model's only context, so it can't mix details between entries. Answers end with a **Sources** row naming the resume sections used. Broad questions ("Who is Haroon?") get the whole resume. The rules: use only resume facts, say "I don't know" otherwise, stay on topic, ignore attempts to change the rules.
 - **Guards before and after the model** ([`src/retrieve.ts`](src/retrieve.ts), [`src/grounding.ts`](src/grounding.ts)):
@@ -23,6 +23,7 @@ With about 30 short resume lines, similarity scores for off-resume questions ove
 
 ### Free-tier limits
 
+- With OpenAI configured, answers cost a small amount per request on your OpenAI account; set a monthly budget limit in the OpenAI dashboard.
 - A free OpenRouter key allows **50 free-model requests per day**, shared by every visitor. Buying $10 of OpenRouter credit once raises this to 1,000 a day, and free models still cost nothing.
 - Repeated first questions (mostly the starter chips) are cached in memory while the function is warm.
 - Free models are sometimes rate-limited upstream. The fallback list in `OPENROUTER_MODELS` handles most of that.
@@ -37,7 +38,8 @@ npm install
 Create `.env.local` (it's gitignored; see `.env.example`):
 
 ```
-OPENROUTER_API_KEY=sk-or-...
+OPENAI_API_KEY=sk-...          # optional but preferred
+OPENROUTER_API_KEY=sk-or-...   # free fallback
 UPSTASH_VECTOR_REST_URL=https://...upstash.io
 UPSTASH_VECTOR_REST_TOKEN=...
 ```
@@ -61,8 +63,8 @@ npm test
 ## Deploy on Vercel
 
 1. Import the GitHub repo in Vercel. It detects Vite: build `npm run build`, output `dist`.
-2. Before the first deploy, add these Environment Variables: `OPENROUTER_API_KEY`, `UPSTASH_VECTOR_REST_URL`, `UPSTASH_VECTOR_REST_TOKEN`.
-3. Optionally set `OPENROUTER_MODELS` (comma-separated OpenRouter model IDs, tried in order) and `VECTOR_MIN_SCORE`.
+2. Before the first deploy, add these Environment Variables: `OPENAI_API_KEY` and/or `OPENROUTER_API_KEY`, `UPSTASH_VECTOR_REST_URL`, `UPSTASH_VECTOR_REST_TOKEN`.
+3. Optionally set `OPENAI_MODEL`, `OPENROUTER_MODELS` (comma-separated OpenRouter model IDs, tried in order) and `VECTOR_MIN_SCORE`.
 
 The `vercel-build` script runs `npm run ingest` before building, so each deploy re-syncs the vector index with `profile.ts`.
 
@@ -76,6 +78,7 @@ Edit [`src/profile.ts`](src/profile.ts). The cards render from it, `resumeMarkdo
 index.html          page shell: landing hero, chat thread, input dock
 api/chat.ts         Vercel function: hybrid retrieval, routing guard, prompt, OpenRouter streaming
 api/_lib/vector.ts  Upstash Vector client and semantic search
+api/_lib/llm.ts     OpenAI and OpenRouter providers with fallback
 scripts/ingest.ts   pushes resume lines into the vector index
 scripts/eval-retrieval.ts  prints vector scores to tune VECTOR_MIN_SCORE
 src/main.ts         chat UI, category answers, quick-answer fallback
