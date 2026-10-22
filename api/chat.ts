@@ -6,6 +6,7 @@ import { systemPrompt } from "../src/prompt.js";
 import { resumeMarkdown } from "../src/profile.js";
 import { fallbackReason, semanticSearch } from "./_lib/vector.js";
 import { hasProvider, streamCompletion } from "./_lib/llm.js";
+import { preflight, rateLimited, withCors } from "./_lib/http.js";
 
 const resume = resumeMarkdown();
 const chunks = parseChunks(resume);
@@ -84,7 +85,19 @@ async function retrieveContext(question: string, history: Turn[]): Promise<Conte
   };
 }
 
+export function OPTIONS(request: Request): Response {
+  return preflight(request);
+}
+
+// Shared by ask.haroonriasat.com and the live chat on haroonriasat.com.
 export async function POST(request: Request): Promise<Response> {
+  if (rateLimited(request, "chat", 30, 10 * 60 * 1000)) {
+    return withCors(Response.json({ error: "rate_limited" }, { status: 429 }), request);
+  }
+  return withCors(await answer(request), request);
+}
+
+async function answer(request: Request): Promise<Response> {
   if (!hasProvider()) return Response.json({ error: "not_configured" }, { status: 503 });
 
   const parsed = parseBody(await request.json().catch(() => null));

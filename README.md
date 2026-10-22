@@ -17,6 +17,15 @@ A small public chatbot that answers questions about [Haroon Riasat](https://gith
 - **Category buttons (Me, Experience, Projects, Skills, Contact)** show cards rendered straight from `profile.ts`: project cards with live-demo links, an experience timeline, grouped skills, and contact links. They are instant, exact, and use no AI requests.
 - **Quick answers as a fallback.** If OpenRouter is down or out of free requests, the bot shows the matching resume lines instead of failing.
 
+### Used by haroonriasat.com
+
+The same backend powers two features on [haroonriasat.com](https://haroonriasat.com):
+
+- **Live chat in the hero.** The homepage calls `POST /api/chat` directly.
+- **"Do I fit your role?"** `POST /api/fit` takes `{ "jobAd": "..." }` (80–8,000 characters) and returns `{ role, summary, items: [{ requirement, level: "strong" | "partial" | "gap", evidence }], counts }`. The job ad is treated as untrusted data. Every piece of evidence is re-checked against the resume ([`src/fit.ts`](src/fit.ts)): a strength with more than two words that aren't in the resume becomes a gap, so the report can show real gaps but never invented strengths.
+
+Cross-origin access is limited to `haroonriasat.com` (plus `ALLOWED_ORIGINS`), and each visitor IP is rate-limited to 30 chat questions and 6 fit checks per 10 minutes ([`api/_lib/http.ts`](api/_lib/http.ts)). The limit lives in each function instance's memory, so it slows scripts down rather than enforcing a global quota; keep a spending limit on the OpenAI account.
+
 ### Retrieval and "I don't know"
 
 With about 30 short resume lines, similarity scores for off-resume questions overlap with real ones ("Has he worked at Google?" scores about 0.71, "What's his education?" about 0.65). So vector search ranks the context, and a question counts as answerable when the keyword router matches it **or** its best vector score is at least `VECTOR_MIN_SCORE` (0.74, tuned with `scripts/eval-retrieval.ts`). Anything else gets "I don't know" without an AI call. If Upstash is unreachable or not configured, the app falls back to keyword search.
@@ -79,6 +88,9 @@ index.html          page shell: landing hero, chat thread, input dock
 api/chat.ts         Vercel function: hybrid retrieval, routing guard, prompt, OpenRouter streaming
 api/_lib/vector.ts  Upstash Vector client and semantic search
 api/_lib/llm.ts     OpenAI and OpenRouter providers with fallback
+api/_lib/http.ts    CORS allow-list and per-visitor rate limit
+api/fit.ts          Vercel function: job-ad fit check
+src/fit.ts          fit prompt and evidence re-checking
 scripts/ingest.ts   pushes resume lines into the vector index
 scripts/eval-retrieval.ts  prints vector scores to tune VECTOR_MIN_SCORE
 src/main.ts         chat UI, category answers, quick-answer fallback

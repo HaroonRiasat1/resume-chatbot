@@ -1,18 +1,27 @@
 import { defineConfig, loadEnv, type Plugin } from "vite";
 
-// Serves api/chat.ts during `npm run dev`, the same handler Vercel runs in production.
+// Serves api/*.ts during `npm run dev`, the same handlers Vercel runs in production.
 function apiDevServer(): Plugin {
   return {
     name: "api-dev-server",
     configureServer(server) {
-      server.middlewares.use("/api/chat", async (req, res) => {
+      server.middlewares.use("/api", async (req, res, next) => {
+        const name = (req.url ?? "").split("?")[0].replace(/^\//, "");
+        if (!/^[a-z-]+$/.test(name)) return next();
         const chunks: Buffer[] = [];
         for await (const c of req) chunks.push(c as Buffer);
-        const { POST } = await server.ssrLoadModule("/api/chat.ts");
-        const response: Response = await POST(
-          new Request("http://localhost/api/chat", {
+        const mod = await server.ssrLoadModule(`/api/${name}.ts`).catch(() => null);
+        const handler = mod?.[req.method ?? "GET"];
+        if (typeof handler !== "function") {
+          res.statusCode = mod ? 405 : 404;
+          return res.end();
+        }
+        const headers = new Headers();
+        for (const [k, v] of Object.entries(req.headers)) if (typeof v === "string") headers.set(k, v);
+        const response: Response = await handler(
+          new Request(`http://localhost/api/${name}`, {
             method: req.method,
-            headers: { "Content-Type": "application/json" },
+            headers,
             body: req.method === "POST" ? Buffer.concat(chunks) : undefined,
           }),
         );

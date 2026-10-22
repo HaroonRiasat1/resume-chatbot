@@ -7,10 +7,15 @@ export interface Message {
   content: string;
 }
 
+interface CallOptions {
+  json?: boolean; // ask for a JSON object (OpenAI honours it; others are told in the prompt)
+  maxTokens?: number;
+}
+
 interface Provider {
   name: string;
   model: string;
-  call(messages: Message[]): Promise<Response>;
+  call(messages: Message[], options?: CallOptions): Promise<Response>;
 }
 
 const OPENROUTER_MODELS = (process.env.OPENROUTER_MODELS ??
@@ -35,7 +40,7 @@ function providers(): Provider[] {
     list.push({
       name: "openai",
       model,
-      call: (messages) =>
+      call: (messages, options = {}) =>
         fetch("https://api.openai.com/v1/chat/completions", {
           method: "POST",
           headers: { Authorization: `Bearer ${openaiKey}`, "Content-Type": "application/json" },
@@ -43,8 +48,9 @@ function providers(): Provider[] {
             model,
             messages,
             stream: true,
-            max_completion_tokens: isReasoningModel(model) ? 1500 : 600,
+            max_completion_tokens: options.maxTokens ?? (isReasoningModel(model) ? 1500 : 600),
             ...(isReasoningModel(model) ? { reasoning_effort: "low" } : { temperature: 0.1 }),
+            ...(options.json ? { response_format: { type: "json_object" } } : {}),
           }),
         }),
     });
@@ -54,7 +60,7 @@ function providers(): Provider[] {
     list.push({
       name: "openrouter",
       model: OPENROUTER_MODELS[0] ?? "",
-      call: (messages) =>
+      call: (messages, options = {}) =>
         fetch("https://openrouter.ai/api/v1/chat/completions", {
           method: "POST",
           headers: {
@@ -69,7 +75,7 @@ function providers(): Provider[] {
             stream: true,
             temperature: 0.1,
             // Reasoning models spend part of this budget thinking, so leave plenty of room for the answer.
-            max_tokens: 1200,
+            max_tokens: options.maxTokens ?? 1200,
             reasoning: { effort: "low", exclude: true },
           }),
         }),
@@ -94,11 +100,11 @@ function skippedSummary(failed: string[]): string {
 
 // Returns the first provider's stream that starts successfully. Falls through on
 // errors and rate limits, so an OpenAI outage or quota problem still gets an answer.
-export async function streamCompletion(messages: Message[]): Promise<Completion> {
+export async function streamCompletion(messages: Message[], options: CallOptions = {}): Promise<Completion> {
   let status = 502;
   const failed: string[] = [];
   for (const p of providers()) {
-    const res = await p.call(messages).catch(() => null);
+    const res = await p.call(messages, options).catch(() => null);
     if (res?.ok && res.body) return { ok: true, body: res.body, provider: `${p.name}/${p.model}`, skipped: skippedSummary(failed) };
     status = res?.status === 429 ? 429 : 502;
     const detail = (await res?.text().catch(() => "")) ?? "";
@@ -107,4 +113,31 @@ export async function streamCompletion(messages: Message[]): Promise<Completion>
     console.error(`${p.name} error`, res?.status, detail);
   }
   return { ok: false, status, skipped: skippedSummary(failed) };
+}
+
+// Collects a streamed completion into one string, for callers that need the whole
+// answer before responding (e.g. JSON that must be validated first).
+export async function completeText(
+  messages: Message[],
+  options: CallOptions = {},
+): Promise<{ ok: true; text: string; provider: string } | { ok: false; status: number }> {
+  const upstream = await streamCompletion(messages, options);
+  if (!upstream.ok) return { ok: false, status: upstream.status };
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let text = "";
+  for await (const chunk of upstream.body as unknown as AsyncIterable<Uint8Array>) {
+    buffer += decoder.decode(chunk, { stream: true });
+    const lines = buffer.split("\n");
+    buffer = lines.pop() ?? "";
+    for (const line of lines) {
+      if (!line.startsWith("data: ") || line === "data: [DONE]") continue;
+      try {
+        text += JSON.parse(line.slice(6)).choices?.[0]?.delta?.content ?? "";
+      } catch {
+        // keep-alive comments and partial lines
+      }
+    }
+  }
+  return { ok: true, text, provider: upstream.provider };
 }
