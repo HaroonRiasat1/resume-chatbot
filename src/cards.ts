@@ -52,7 +52,7 @@ export function experienceCard(): HTMLElement {
         h(
           "div",
           { class: "what" },
-          h("strong", {}, e.role),
+          h("strong", {}, e.role.replace(" (internship)", "")),
           h("span", { class: "at" }, " · ", e.url ? external(e.url, e.company) : e.company, ` · ${e.place}`),
           h("p", {}, e.text),
           ...(e.more ?? []).map((m) => h("p", {}, m)),

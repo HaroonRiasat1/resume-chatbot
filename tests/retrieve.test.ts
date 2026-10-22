@@ -76,3 +76,8 @@ test("LinkedIn additions are retrievable", () => {
   assert.match(text("What was his GPA?"), /4\.7/);
   assert.match(text("Is his AWS certification still valid?"), /expired Jun 2026/);
 });
+
+test("internship questions find his own internships, not just the program he ran", () => {
+  const text = retrieve("Did he do any internships?", chunks).map((c) => c.text).join(" ");
+  assert.match(text, /MRS Technologies|Equipment Management System/);
+});

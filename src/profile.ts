@@ -50,14 +50,14 @@ export const profile = {
       text: "Led a team of 6 software engineers delivering and maintaining 20+ production AI-based full-stack web and iOS applications, owning the full SDLC from requirements through deployment.",
     },
     {
-      role: "Software Engineering Intern",
+      role: "Software Engineering Intern (internship)",
       company: "MRS Technologies",
       place: "Islamabad, Pakistan",
       dates: "Jul 2022 – Sep 2022",
       text: "Part of a small team that took a carpooling app from idea to a working MVP on AWS. Proposed the MVP, gathered requirements and designed the domain model; built the React + Tailwind CSS admin portal; set up the domain with Route 53 and deployed with AWS Amplify; used AWS Cognito for authentication and Firebase (Firestore, Realtime Database); helped design the ride-matching algorithm. Worked in Scrum with Jira, Trello, GitHub/GitLab, Docker and Figma.",
     },
     {
-      role: "Software Engineering Intern",
+      role: "Software Engineering Intern (internship)",
       company: "QUEST I-8",
       place: "Islamabad, Pakistan",
       dates: "Aug 2021 – Oct 2021",
