@@ -4,7 +4,8 @@ import { terms } from "./retrieve.js";
 const COMMON = new Set(
   ("yes no sure service such degree master bachelor feature include several hold work worked working " +
     "currently also known include including well both various multiple experience experienced project " +
-    "skill skilled background knowledge called named").split(" "),
+    "skill skilled background knowledge called named " +
+    "january february march april may june july august september october november december").split(" "),
 );
 
 const stem = (w: string) => w.replace(/(ing|ed|es|s)$/, "");
@@ -16,5 +17,6 @@ export function isGrounded(answer: string, resume: string, question: string): bo
   const vocab = new Set([...terms(resume), ...terms(question)].map(stem));
   const words = terms(answer).filter((w) => w.length > 3);
   const missing = words.filter((w) => !vocab.has(stem(w)) && !COMMON.has(stem(w)) && !COMMON.has(w));
-  return missing.length < 4 || missing.length / words.length <= 0.5;
+  // Tuned on real answers (at most ~15% unseen words) vs invented ones (~47%+).
+  return missing.length < 5 || missing.length / words.length <= 0.3;
 }

@@ -51,6 +51,13 @@ const SYNONYMS: Record<string, string[]> = {
   currently: ["present"],
   now: ["present"],
   study: ["education", "university"],
+  hobby: ["hobbies", "beyond work"],
+  interests: ["hobbies", "beyond work"],
+  fun: ["hobbies", "beyond work"],
+  free: ["free time", "hobbies"],
+  pet: ["cats"],
+  pets: ["cats"],
+  favorite: ["favourite"],
   internship: ["intern"],
   internships: ["intern"],
   intern: ["internship"],
@@ -117,8 +124,11 @@ export function retrieve(question: string, chunks: Chunk[], limit = 5): Chunk[] 
     const text = chunk.text.toLowerCase();
     return { chunk, text, section: chunk.section.toLowerCase(), words: new Set(terms(text).map(stem)) };
   });
+  // Prefix matches must start at a word boundary, so "rust" doesn't hit "trust".
+  const startsWord = (text: string, word: string) =>
+    new RegExp(`(^|[^a-z0-9])${word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`).test(text);
   const hits = (doc: (typeof docs)[number], word: string) =>
-    doc.words.has(stem(word)) || (word.length > 3 && doc.text.includes(word));
+    doc.words.has(stem(word)) || (word.length > 3 && startsWord(doc.text, word));
   // Rarer words count for more, so "aws" outweighs a broad word like "experience".
   const weight = (word: string) => {
     const df = docs.filter((d) => hits(d, word) || d.section.includes(word)).length;
@@ -150,7 +160,7 @@ export function retrieve(question: string, chunks: Chunk[], limit = 5): Chunk[] 
 
 // Personal details that are never in the resume. Refuse these up front instead
 // of letting a keyword ("phone" -> "phones") or a small model drift into a guess.
-const PRIVATE = /\b(salary|salaries|pay|paid|earn|earns|income|rate|phone|number|address|age|old|birthday|born|married|wife|husband|girlfriend|boyfriend|kids|children|religion|politic\w*|visa|passport|ssn|weight|height|nationality|favou?rite|hobby|hobbies)\b/i;
+const PRIVATE = /\b(salary|salaries|pay|paid|earn|earns|income|rate|phone|number|address|age|old|birthday|born|married|wife|husband|girlfriend|boyfriend|kids|children|religion|politic\w*|visa|passport|ssn|weight|height|nationality)\b/i;
 
 export function isPrivateQuestion(question: string): boolean {
   return PRIVATE.test(question) && !/\b(projects?|years of experience|team)\b/i.test(question);

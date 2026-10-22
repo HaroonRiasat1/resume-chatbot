@@ -56,8 +56,17 @@ test("section-level questions reach the model", () => {
   assert.ok(sections("What's his education?").includes("Education"));
 });
 
-test("personal trivia is refused without the model", () => {
-  assert.equal(route("What's his favorite movie?", chunks), "private");
+test("hobbies come from his Beyond work section; private details stay refused", () => {
+  assert.equal(route("What are his hobbies?", chunks), "answer");
+  assert.match(retrieve("Does he have pets?", chunks).map((c) => c.text).join(" "), /three cats/);
+  assert.match(retrieve("What's his favorite place?", chunks).map((c) => c.text).join(" "), /Lofoten/);
+  assert.equal(route("What is his phone number?", chunks), "private");
+});
+
+test("resume PDF details win over LinkedIn on internships", () => {
+  const text = retrieve("What did he build at MRS Technologies?", chunks).map((c) => c.text).join(" ");
+  assert.match(text, /MERN stack, AWS Amplify, EC2 and S3/);
+  assert.doesNotMatch(text, /Firebase/);
 });
 
 test("paraphrases found while tuning vector search", () => {
@@ -80,4 +89,13 @@ test("LinkedIn additions are retrievable", () => {
 test("internship questions find his own internships, not just the program he ran", () => {
   const text = retrieve("Did he do any internships?", chunks).map((c) => c.text).join(" ");
   assert.match(text, /MRS Technologies|Equipment Management System/);
+});
+
+test("facts from the newer resume are retrievable", () => {
+  const text = (q: string) => retrieve(q, chunks).map((c) => c.text).join(" ");
+  assert.match(text("What is Kinwell?"), /nutritionists|MCP server/i);
+  assert.match(text("Has he worked with Laravel?"), /PHP\/Laravel|Laravel/);
+  assert.match(text("Has he fine-tuned LLMs?"), /fine-tuned LLMs/);
+  assert.match(text("Does he know Contentful?"), /Contentful/);
+  assert.equal(route("Has he built an MCP server?", chunks), "answer");
 });

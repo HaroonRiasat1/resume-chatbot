@@ -25,6 +25,8 @@ const answerable = [
   "What was his thesis about?",
   "Has he won any awards?",
   "What languages does he speak?",
+  "What are his hobbies?",
+  "What is Kinwell?",
 ];
 const unanswerable = [
   "Does he know Rust?",
@@ -34,7 +36,6 @@ const unanswerable = [
   "What's the capital of France?",
   "Is he good at football?",
   "Has he used Azure?",
-  "What are his hobbies?",
 ];
 
 for (const [label, qs] of [["SHOULD ANSWER", answerable], ["SHOULD REFUSE", unanswerable]] as const) {
