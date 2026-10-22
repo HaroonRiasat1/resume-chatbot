@@ -134,7 +134,7 @@ export const profile = {
       text: "Chat with Haroon's resume (this site): a RAG assistant grounded only in his public profile. Hybrid semantic + keyword retrieval over Upstash Vector, OpenAI models with free open-source models via OpenRouter as a fallback, answers that cite their resume sections, and guards that say \"I don't know\" instead of guessing.",
       tech: ["TypeScript", "Vite", "Vercel Functions", "Upstash Vector", "OpenAI", "OpenRouter"],
       repo: "https://github.com/HaroonRiasat1/resume-chatbot",
-      demo: "https://resume-chatbot-chi.vercel.app",
+      demo: "https://ask.haroonriasat.com",
       theme: "rag",
     },
     {

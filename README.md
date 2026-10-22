@@ -2,7 +2,7 @@
 
 A small public chatbot that answers questions about [Haroon Riasat](https://github.com/HaroonRiasat1): his experience, projects, skills, and education. Visitors open a link and start asking, with nothing to install.
 
-**Try it live: [resume-chatbot-chi.vercel.app](https://resume-chatbot-chi.vercel.app)**
+**Try it live: [ask.haroonriasat.com](https://ask.haroonriasat.com)**
 
 ## How it works
 
