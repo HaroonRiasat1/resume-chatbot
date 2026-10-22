@@ -19,13 +19,17 @@ const OPENROUTER_MODELS = (process.env.OPENROUTER_MODELS ??
   .map((m) => m.trim())
   .filter(Boolean);
 
+// Keys pasted into a dashboard often pick up quotes or whitespace; OpenAI then
+// answers 401. Normalise them so a copy-paste slip doesn't silently disable a provider.
+const cleanKey = (value: string | undefined) => value?.trim().replace(/^["']|["']$/g, "").trim() || undefined;
+
 // Reasoning models (o-series, gpt-5 and later) reject temperature and spend part of the
 // token budget thinking, so they get a low reasoning effort and a roomier limit.
 const isReasoningModel = (model: string) => /^(o\d|gpt-[5-9])/.test(model);
 
 function providers(): Provider[] {
   const list: Provider[] = [];
-  const openaiKey = process.env.OPENAI_API_KEY;
+  const openaiKey = cleanKey(process.env.OPENAI_API_KEY);
   if (openaiKey) {
     const model = process.env.OPENAI_MODEL ?? "gpt-5.4-mini";
     list.push({
@@ -45,7 +49,7 @@ function providers(): Provider[] {
         }),
     });
   }
-  const openrouterKey = process.env.OPENROUTER_API_KEY;
+  const openrouterKey = cleanKey(process.env.OPENROUTER_API_KEY);
   if (openrouterKey) {
     list.push({
       name: "openrouter",
