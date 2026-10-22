@@ -19,8 +19,6 @@ const OPENROUTER_MODELS = (process.env.OPENROUTER_MODELS ??
   .map((m) => m.trim())
   .filter(Boolean);
 
-import { createHash } from "node:crypto";
-
 // Keys pasted into a dashboard often pick up quotes or whitespace; OpenAI then
 // answers 401. Normalise them so a copy-paste slip doesn't silently disable a provider.
 const cleanKey = (value: string | undefined) => value?.trim().replace(/^["']|["']$/g, "").trim() || undefined;
@@ -92,13 +90,6 @@ export type Completion =
 function skippedSummary(failed: string[]): string {
   const notSet = process.env.OPENAI_API_KEY ? [] : ["openai:not-set"];
   return [...notSet, ...failed].join(",") || "none";
-}
-
-// One-way fingerprint (length + first 8 hex chars of SHA-256) so a deployed key can be
-// compared with a known-good local one without revealing it.
-export function keyFingerprint(): string {
-  const key = cleanKey(process.env.OPENAI_API_KEY);
-  return key ? `${key.length}:${createHash("sha256").update(key).digest("hex").slice(0, 8)}` : "none";
 }
 
 // Returns the first provider's stream that starts successfully. Falls through on

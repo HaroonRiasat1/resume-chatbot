@@ -5,7 +5,7 @@ import { DONT_KNOW, OFF_TOPIC, parseChunks, retrieve, route, terms, type Chunk }
 import { systemPrompt } from "../src/prompt.js";
 import { resumeMarkdown } from "../src/profile.js";
 import { fallbackReason, semanticSearch } from "./_lib/vector.js";
-import { hasProvider, keyFingerprint, streamCompletion } from "./_lib/llm.js";
+import { hasProvider, streamCompletion } from "./_lib/llm.js";
 
 const resume = resumeMarkdown();
 const chunks = parseChunks(resume);
@@ -149,6 +149,6 @@ export async function POST(request: Request): Promise<Response> {
     }),
   );
   return new Response(stream, {
-    headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store", "X-Sources": sources, "X-Retrieval": context.mode, "X-Model": upstream.provider, "X-Model-Skipped": upstream.skipped, "X-OpenAI-Key-Fingerprint": keyFingerprint() },
+    headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store", "X-Sources": sources, "X-Retrieval": context.mode, "X-Model": upstream.provider, "X-Model-Skipped": upstream.skipped },
   });
 }
