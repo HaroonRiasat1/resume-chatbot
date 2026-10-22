@@ -19,15 +19,15 @@ const OPENROUTER_MODELS = (process.env.OPENROUTER_MODELS ??
   .map((m) => m.trim())
   .filter(Boolean);
 
-// Reasoning models (o-series, gpt-5 family) reject temperature and spend part of the
+// Reasoning models (o-series, gpt-5 and later) reject temperature and spend part of the
 // token budget thinking, so they get a low reasoning effort and a roomier limit.
-const isReasoningModel = (model: string) => /^(o\d|gpt-5)/.test(model);
+const isReasoningModel = (model: string) => /^(o\d|gpt-[5-9])/.test(model);
 
 function providers(): Provider[] {
   const list: Provider[] = [];
   const openaiKey = process.env.OPENAI_API_KEY;
   if (openaiKey) {
-    const model = process.env.OPENAI_MODEL ?? "gpt-4.1-mini";
+    const model = process.env.OPENAI_MODEL ?? "gpt-5.4-mini";
     list.push({
       name: "openai",
       model,
