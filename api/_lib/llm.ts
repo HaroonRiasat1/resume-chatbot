@@ -19,6 +19,8 @@ const OPENROUTER_MODELS = (process.env.OPENROUTER_MODELS ??
   .map((m) => m.trim())
   .filter(Boolean);
 
+import { createHash } from "node:crypto";
+
 // Keys pasted into a dashboard often pick up quotes or whitespace; OpenAI then
 // answers 401. Normalise them so a copy-paste slip doesn't silently disable a provider.
 const cleanKey = (value: string | undefined) => value?.trim().replace(/^["']|["']$/g, "").trim() || undefined;
@@ -84,11 +86,19 @@ export type Completion =
   | { ok: true; body: ReadableStream<Uint8Array>; provider: string; skipped: string }
   | { ok: false; status: number; skipped: string };
 
-// Why each earlier provider was passed over, e.g. "openai:401" or "openai:not-set".
-// Only names and status codes, never keys, so it is safe to expose in a header.
+// Why each earlier provider was passed over, e.g. "openai:401:invalid_api_key" or
+// "openai:not-set". Only names, status and error codes, never keys, so it is safe to
+// expose in a header.
 function skippedSummary(failed: string[]): string {
   const notSet = process.env.OPENAI_API_KEY ? [] : ["openai:not-set"];
   return [...notSet, ...failed].join(",") || "none";
+}
+
+// One-way fingerprint (length + first 8 hex chars of SHA-256) so a deployed key can be
+// compared with a known-good local one without revealing it.
+export function keyFingerprint(): string {
+  const key = cleanKey(process.env.OPENAI_API_KEY);
+  return key ? `${key.length}:${createHash("sha256").update(key).digest("hex").slice(0, 8)}` : "none";
 }
 
 // Returns the first provider's stream that starts successfully. Falls through on
@@ -100,8 +110,10 @@ export async function streamCompletion(messages: Message[]): Promise<Completion>
     const res = await p.call(messages).catch(() => null);
     if (res?.ok && res.body) return { ok: true, body: res.body, provider: `${p.name}/${p.model}`, skipped: skippedSummary(failed) };
     status = res?.status === 429 ? 429 : 502;
-    failed.push(`${p.name}:${res?.status ?? "network"}`);
-    console.error(`${p.name} error`, res?.status, await res?.text().catch(() => ""));
+    const detail = (await res?.text().catch(() => "")) ?? "";
+    const code = /"code":\s*"([a-z_]+)"/.exec(detail)?.[1];
+    failed.push(`${p.name}:${res?.status ?? "network"}${code ? `:${code}` : ""}`);
+    console.error(`${p.name} error`, res?.status, detail);
   }
   return { ok: false, status, skipped: skippedSummary(failed) };
 }
