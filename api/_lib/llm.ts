@@ -77,18 +77,27 @@ function providers(): Provider[] {
 export const hasProvider = () => providers().length > 0;
 
 export type Completion =
-  | { ok: true; body: ReadableStream<Uint8Array>; provider: string }
-  | { ok: false; status: number };
+  | { ok: true; body: ReadableStream<Uint8Array>; provider: string; skipped: string }
+  | { ok: false; status: number; skipped: string };
+
+// Why each earlier provider was passed over, e.g. "openai:401" or "openai:not-set".
+// Only names and status codes, never keys, so it is safe to expose in a header.
+function skippedSummary(failed: string[]): string {
+  const notSet = process.env.OPENAI_API_KEY ? [] : ["openai:not-set"];
+  return [...notSet, ...failed].join(",") || "none";
+}
 
 // Returns the first provider's stream that starts successfully. Falls through on
 // errors and rate limits, so an OpenAI outage or quota problem still gets an answer.
 export async function streamCompletion(messages: Message[]): Promise<Completion> {
   let status = 502;
+  const failed: string[] = [];
   for (const p of providers()) {
     const res = await p.call(messages).catch(() => null);
-    if (res?.ok && res.body) return { ok: true, body: res.body, provider: `${p.name}/${p.model}` };
+    if (res?.ok && res.body) return { ok: true, body: res.body, provider: `${p.name}/${p.model}`, skipped: skippedSummary(failed) };
     status = res?.status === 429 ? 429 : 502;
+    failed.push(`${p.name}:${res?.status ?? "network"}`);
     console.error(`${p.name} error`, res?.status, await res?.text().catch(() => ""));
   }
-  return { ok: false, status };
+  return { ok: false, status, skipped: skippedSummary(failed) };
 }

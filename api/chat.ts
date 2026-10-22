@@ -149,6 +149,6 @@ export async function POST(request: Request): Promise<Response> {
     }),
   );
   return new Response(stream, {
-    headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store", "X-Sources": sources, "X-Retrieval": context.mode, "X-Model": upstream.provider },
+    headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store", "X-Sources": sources, "X-Retrieval": context.mode, "X-Model": upstream.provider, "X-Model-Skipped": upstream.skipped },
   });
 }
