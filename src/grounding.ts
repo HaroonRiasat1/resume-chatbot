@@ -4,7 +4,7 @@ import { terms } from "./retrieve.js";
 const COMMON = new Set(
   ("yes no sure service such degree master bachelor feature include several hold work worked working " +
     "currently also known include including well both various multiple experience experienced project " +
-    "skill skilled background knowledge called named " +
+    "skill skilled background knowledge called named course courses learning learn studying " +
     "january february march april may june july august september october november december " +
     // evaluative words used in summaries; they carry no factual claims
     "look looks seem seems appear appears strong strongly solid substantial extensive main mainly key core overall " +
