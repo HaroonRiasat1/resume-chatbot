@@ -12,7 +12,7 @@ A small public chatbot that answers questions about [Haroon Riasat](https://gith
 - **Guards before and after the model** ([`src/retrieve.ts`](src/retrieve.ts), [`src/grounding.ts`](src/grounding.ts)):
   - Private details (salary, phone, address, age…) get "I don't know" with no model call.
   - Unrelated tasks ("write me a function") are declined with no model call.
-  - Specific things the resume never mentions ("Does he know Kubernetes?") get "I don't know" with no model call.
+  - Specific things the resume never mentions ("Does he know Rust?") get "I don't know" with no model call.
   - If an answer's wording drifts far from the resume, the visitor gets the matching resume lines instead.
 - **Category buttons (Me, Experience, Projects, Skills, Contact)** show cards rendered straight from `profile.ts`: project cards with live-demo links, an experience timeline, grouped skills, and contact links. They are instant, exact, and use no AI requests.
 - **Quick answers as a fallback.** If OpenRouter is down or out of free requests, the bot shows the matching resume lines instead of failing.

@@ -307,6 +307,11 @@ body.chatting .thread { display: block; }
 .edu strong { font-size: 14.5px; }
 .edu span { font-size: 13px; color: var(--muted); }
 
+.about-h { margin: 16px 0 6px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+.about-p { margin: 0; font-size: 14px; }
+.awards { margin: 0; padding-left: 18px; font-size: 14px; }
+.awards li { margin: 4px 0; }
+
 /* contact */
 .contact { display: grid; gap: 8px; max-width: 440px; }
 .contact-row {

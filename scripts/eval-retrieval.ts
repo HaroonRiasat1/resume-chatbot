@@ -21,10 +21,14 @@ const answerable = [
   "Which projects can I try in the browser?",
   "Has he worked at a startup?",
   "What is he doing right now?",
+  "Does he know Kubernetes?",
+  "What was his thesis about?",
+  "Has he won any awards?",
+  "What languages does he speak?",
 ];
 const unanswerable = [
-  "Does he know Kubernetes?",
   "Does he know Rust?",
+  "Does he know Terraform?",
   "Has he worked at Google?",
   "Does he speak German?",
   "What's the capital of France?",

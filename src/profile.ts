@@ -1,6 +1,7 @@
 // Haroon's public profile: the single source of truth. The chat cards render from
 // this data, and resumeMarkdown() turns it into the text the AI is grounded in.
-// Built from https://github.com/HaroonRiasat1/HaroonRiasat1 — public facts only.
+// Built from https://github.com/HaroonRiasat1/HaroonRiasat1 and his LinkedIn profile
+// (professional sections only, chosen by Haroon) — public facts only.
 
 export const profile = {
   name: "Haroon Riasat",
@@ -35,6 +36,10 @@ export const profile = {
       place: "Remote",
       dates: "Nov 2023 – Present",
       text: "Co-founded a product engineering consultancy that has delivered 60+ products for international clients across SaaS, e-commerce, AI, and automation. Owns architecture, implementation, cloud deployment, and operations end to end.",
+      more: [
+        "Typical Exitech stack: React/Next.js, Node.js/TypeScript, Python and PostgreSQL, shipped as containerised AWS deployments with Docker, Kubernetes and CI/CD pipelines. Owns technical decisions with client stakeholders, trading off cost, speed and reliability.",
+        "Led the Exitech AI Internship Program, co-created with his co-founder for final-year students: over three months the interns built 12 fully functional AI web products, backend to frontend, comparing multiple LLMs and tools along the way.",
+      ],
     },
     {
       role: "Software Engineer",
@@ -43,7 +48,35 @@ export const profile = {
       dates: "Feb 2023 – Jun 2024",
       text: "Led a team of 6 software engineers delivering and maintaining 20+ production AI-based full-stack web and iOS applications, owning the full SDLC from requirements through deployment.",
     },
+    {
+      role: "Software Engineering Intern",
+      company: "MRS Technologies",
+      place: "Islamabad, Pakistan",
+      dates: "Jul 2022 – Sep 2022",
+      text: "Part of a small team that took a carpooling app from idea to a working MVP on AWS. Proposed the MVP, gathered requirements and designed the domain model; built the React + Tailwind CSS admin portal; set up the domain with Route 53 and deployed with AWS Amplify; used AWS Cognito for authentication and Firebase (Firestore, Realtime Database); helped design the ride-matching algorithm. Worked in Scrum with Jira, Trello, GitHub/GitLab, Docker and Figma.",
+    },
+    {
+      role: "Software Engineering Intern",
+      company: "QUEST I-8",
+      place: "Islamabad, Pakistan",
+      dates: "Aug 2021 – Oct 2021",
+      text: "Developed an Equipment Management System using HTML, CSS, Bootstrap, PHP and MySQL.",
+    },
+  ] as Experience[],
+  leadership: [
+    "Chair, IEEE Computer Society FAST Islamabad Chapter (Jul 2022 – Jul 2023): led the chapter and organized technical events, workshops and sessions for student skill development. Organized 80+ tech events during his bachelor's.",
+    "Deputy Chairman (Vice President), Society for Advanced Studies and Research, FAST-NUCES (Oct 2021 – Sep 2022): arranged seminars on research-based final-year projects using AI and data science, cloud computing, and the first postgraduate research symposium; started an initiative promoting computer science in government colleges in Pakistan.",
+    "Chairperson, FAST ISYWSC'22 (Nov – Dec 2022).",
+    "Teaching Assistant, FAST-NUCES (Mar 2021 – Jul 2022): Operating Systems (graded quizzes and assignments for 180+ students) and Pakistan Studies (150+ students).",
+    "Deputy Secretary, NaSCon (Mar – Apr 2022), and Vice Head PR, National University Computing Society (Nov 2020 – Aug 2021).",
   ],
+  awards: [
+    "1st place, Microsoft, Nokia & Elisa Hackathon (with a teammate): a 5G/6G drone network for healthcare in remote areas, covering emergency medicine deliveries, on-board diagnostics and telemedicine.",
+    "ICT Showroom 2025 finalist with Åbo Akademi University's Fridge app (scans groceries to track expiry dates and suggests recipes): Best UI award from the jury, plus first place for Best Technical Content and Best Presentation in the public vote.",
+    "Runner-up, Softec Web Development Competition at FAST Lahore (Mar 2022): built a clinic management system with MongoDB, Express, React and Node.js.",
+    "Dean's List of Honor three times at FAST-NUCES (Spring 2021, Fall 2021, Spring 2023).",
+  ],
+  languages: ["English: professional working proficiency", "Finnish: elementary proficiency"],
   projects: [
     {
       name: "wild-frequencies",
@@ -119,19 +152,57 @@ export const profile = {
     "Bejeweled-Game-Code-c- and DODGE_EM-GAME: games built with C++, OpenGL, and GLUT.",
   ],
   skills: [
-    { group: "Cloud & DevOps", items: ["AWS (EC2, S3, Amplify, Bedrock, SageMaker)", "Docker", "Linux", "Git/GitHub", "CI/CD"] },
+    { group: "Cloud & DevOps", items: ["AWS (EC2, S3, Amplify, Bedrock, SageMaker, Cognito, Route 53)", "Docker", "Kubernetes", "Linux", "Git/GitHub", "CI/CD"] },
     { group: "AI/ML", items: ["OpenAI, Claude and Gemini APIs", "RAG", "embeddings", "LangChain", "LlamaIndex", "Pinecone", "pgvector", "Chroma"] },
     { group: "Frontend", items: ["React", "Next.js", "TypeScript", "JavaScript", "Tailwind CSS"] },
     { group: "Backend", items: ["Node.js", "Express", "PHP", "Laravel", "Python", "Flask", "Django", "REST APIs"] },
     { group: "Mobile", items: ["React Native", "SwiftUI/Swift"] },
-    { group: "Databases", items: ["PostgreSQL", "MongoDB", "SQL"] },
+    { group: "Databases", items: ["PostgreSQL", "MongoDB", "SQL", "Firebase"] },
+    { group: "Ways of working", items: ["Project management", "Scrum", "Jira", "Figma", "Software design", "UX"] },
   ],
   education: [
-    { degree: "M.Sc. Information Technology (Computer Engineering)", school: "Åbo Akademi University", place: "Turku, Finland", date: "Jun 2026" },
-    { degree: "B.Sc. Computer Science", school: "FAST-NUCES", place: "Islamabad, Pakistan", date: "Jun 2023" },
+    {
+      degree: "M.Sc. Information Technology (Computer Engineering)",
+      school: "Åbo Akademi University",
+      place: "Turku, Finland",
+      date: "Jun 2026",
+      grade: "GPA 4.7/5.0",
+      details: [
+        "Specialized in Scalable Software Systems, with coursework in Cloud Computing, Software Construction, Software Quality, System Safety, and GPU Programming.",
+        "Master's thesis: \"TaskLint: AI-driven Task Auditing for Project Management\" (https://www.doria.fi/handle/10024/194918). He built an AI-powered Chrome extension that audits project-board tasks in real time for clarity, ownership, deadlines, workflow consistency, and delivery risks, evaluated through benchmark testing, predictive analysis, and an industry case study.",
+        "Active member of the Erasmus Student Network.",
+      ],
+    },
+    {
+      degree: "B.Sc. Computer Science",
+      school: "FAST-NUCES",
+      place: "Islamabad, Pakistan",
+      date: "Jun 2023",
+      grade: "GPA 3.49/4.0",
+      details: [
+        "Major in Software Engineering, with courses including Web Development, DevOps, Cloud Computing, Information Security, Ethical Hacking, Artificial Intelligence, Digital Image Processing, Computer Networks, and Software Design.",
+        "Dean's List of Honor three times.",
+      ],
+    },
   ],
-  certifications: ["AWS Certified Cloud Practitioner"],
+  certifications: [
+    "AWS Certified Cloud Practitioner (issued Jun 2023, expired Jun 2026)",
+    "Fundamentals for Istio, Solo.io (May 2023)",
+    "React State Management, LinkedIn Learning (Jun 2022)",
+    "The Complete 2022 Web Development Bootcamp, Udemy (Jan 2022)",
+    "Introduction to Data Science in Python, DataCamp (May 2021)",
+  ],
 };
+
+export interface Experience {
+  role: string;
+  company: string;
+  url?: string;
+  place: string;
+  dates: string;
+  text: string;
+  more?: string[];
+}
 
 export interface Project {
   name: string;
@@ -163,9 +234,11 @@ export function resumeMarkdown(): string {
     "",
     "## Experience",
     "",
-    ...p.experience.map(
-      (e) => `- ${e.role}, ${e.company}${e.url ? ` (${e.url})` : ""}, ${e.place}. ${e.dates.replace("–", "to")}. ${e.text}`,
-    ),
+    ...p.experience.flatMap((e) => [
+      `- ${e.role}, ${e.company}${e.url ? ` (${e.url})` : ""}, ${e.place}. ${e.dates.replace("–", "to")}. ${e.text}`,
+      // Extra detail as its own lines (one vector each), named so they stand alone.
+      ...(e.more ?? []).map((m) => `- ${e.company}: ${m}`),
+    ]),
     "",
     "## Selected work projects",
     "",
@@ -182,11 +255,26 @@ export function resumeMarkdown(): string {
     "",
     "## Education",
     "",
-    ...p.education.map((e) => `- ${e.degree}, ${e.school}, ${e.place}. ${e.date}.`),
+    ...p.education.flatMap((e) => [
+      `- ${e.degree}, ${e.school}, ${e.place}. ${e.date}. ${e.grade}.`,
+      ...e.details.map((d) => `- ${e.school} ${e.degree.split(" ")[0]}: ${d}`),
+    ]),
     "",
     "## Certifications",
     "",
     ...p.certifications.map((c) => `- ${c}`),
+    "",
+    "## Honors and awards",
+    "",
+    ...p.awards.map((a) => `- ${a}`),
+    "",
+    "## Leadership and activities",
+    "",
+    ...p.leadership.map((l) => `- ${l}`),
+    "",
+    "## Languages",
+    "",
+    ...p.languages.map((l) => `- ${l}`),
     "",
   ].join("\n");
 }

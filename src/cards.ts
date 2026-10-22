@@ -55,6 +55,7 @@ export function experienceCard(): HTMLElement {
           h("strong", {}, e.role),
           h("span", { class: "at" }, " · ", e.url ? external(e.url, e.company) : e.company, ` · ${e.place}`),
           h("p", {}, e.text),
+          ...(e.more ?? []).map((m) => h("p", {}, m)),
         ),
       ),
     ),
@@ -81,9 +82,18 @@ export function aboutCard(): HTMLElement {
       "ul",
       { class: "edu" },
       ...profile.education.map((e) =>
-        h("li", {}, h("strong", {}, e.degree), h("span", {}, `${e.school}, ${e.place} · ${e.date}`)),
+        h("li", {}, h("strong", {}, e.degree), h("span", {}, `${e.school}, ${e.place} · ${e.date} · ${e.grade}`)),
       ),
     ),
+    h("h4", { class: "about-h" }, "Thesis"),
+    h(
+      "p",
+      { class: "about-p" },
+      "TaskLint: AI-driven Task Auditing for Project Management. ",
+      external("https://www.doria.fi/handle/10024/194918", "Read it ↗"),
+    ),
+    h("h4", { class: "about-h" }, "Awards"),
+    h("ul", { class: "awards" }, ...profile.awards.map((a) => h("li", {}, a))),
   );
 }
 
