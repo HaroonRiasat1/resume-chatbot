@@ -107,18 +107,18 @@ export const profile = {
       theme: "concert",
     },
     {
-      name: "Subqc AI",
+      name: "Field Inspection AI",
       kind: "Work project",
       text: "AI-powered CRM forms and reporting platform. Field teams were filling in inspections and writing reports by hand; he led development of the platform that automates inspections, checklists and report generation, and owned the core implementation and AWS deployment.",
       tech: ["MERN", "OpenAI", "embeddings", "AWS"],
-      theme: "subqc",
+      theme: "inspection",
     },
     {
-      name: "Council Tap",
+      name: "Legal Transcription AI",
       kind: "Work project",
-      text: "AI court-hearing transcription tool. Lawyers in Maui County needed usable notes from long, noisy court-hearing recordings; he led the architecture and delivery of a pipeline that transcribes the audio with Deepgram and uses Claude to turn it into structured, lawyer-ready notes, running on AWS.",
+      text: "AI court-hearing transcription tool. Lawyers needed usable notes from long, noisy court-hearing recordings; he led the architecture and delivery of a pipeline that transcribes the audio with Deepgram and uses Claude to turn it into structured, lawyer-ready notes, running on AWS.",
       tech: ["MERN", "Claude", "Python", "Deepgram", "AWS"],
-      theme: "council",
+      theme: "legal",
     },
     {
       name: "Kinwell",

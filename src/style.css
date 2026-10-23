@@ -253,8 +253,8 @@ body.chatting .thread { display: block; }
 .msg .pcard-links a.primary { background: #fff; color: #111; }
 .pcard-links .nda { font-size: 12px; opacity: 0.7; }
 .theme-concert { background: linear-gradient(160deg, #7c3aed, #db2777 70%, #f59e0b); }
-.theme-subqc { background: linear-gradient(160deg, #0f172a, #0e7490); }
-.theme-council { background: linear-gradient(160deg, #1c1917, #92400e); }
+.theme-inspection { background: linear-gradient(160deg, #0f172a, #0e7490); }
+.theme-legal { background: linear-gradient(160deg, #1c1917, #92400e); }
 .theme-map { background: linear-gradient(160deg, #065f46, #10b981); }
 .theme-trip { background: linear-gradient(160deg, #0369a1, #38bdf8); }
 .theme-runner { background: linear-gradient(160deg, #c2410c, #fb923c); }

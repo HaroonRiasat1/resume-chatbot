@@ -17,7 +17,7 @@ test("education question", () => {
 
 test("AI projects", () => {
   const text = retrieve("Which AI projects has he built?", chunks).map((c) => c.text).join(" ");
-  assert.match(text, /Subqc|Council Tap|RAG/);
+  assert.match(text, /Field Inspection AI|Legal Transcription AI|RAG/);
 });
 
 test("contact", () => {
