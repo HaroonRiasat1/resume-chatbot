@@ -125,7 +125,21 @@ export function terms(text: string): string[] {
     .filter((w) => w.length > 1 && !STOPWORDS.has(w));
 }
 
+// "Where did he work before Amplon?" names one company, which would otherwise pull
+// only that company's lines. Work-history questions also get every dated role line.
+const HISTORY_WORD = /\b(before|previous(ly)?|prior|earlier|past|other|history)\b/i;
+const JOB_WORD = /\b(work|worked|jobs?|roles?|compan(y|ies)|employers?|positions?)\b/i;
+const WORK_QUESTION = /\bwhere (has|did|does) he work|\b(which|what) companies\b/i;
+const ROLE_LINE = /\b[A-Z][a-z]{2} \d{4} to (Present|[A-Z][a-z]{2} \d{4})\b/;
+export const isWorkHistory = (q: string) => WORK_QUESTION.test(q) || (HISTORY_WORD.test(q) && JOB_WORD.test(q));
+
 export function retrieve(question: string, chunks: Chunk[], limit = 5): Chunk[] {
+  const roles = isWorkHistory(question) ? chunks.filter((c) => c.section === "Experience" && ROLE_LINE.test(c.text)) : [];
+  const found = rank(question, chunks, limit);
+  return roles.length ? [...roles, ...found.filter((c) => !roles.includes(c))] : found;
+}
+
+function rank(question: string, chunks: Chunk[], limit: number): Chunk[] {
   const query = [...new Set(terms(question))];
   if (!query.length) return [];
   const docs = chunks.map((chunk) => {

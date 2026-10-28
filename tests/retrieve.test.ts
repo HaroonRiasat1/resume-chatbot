@@ -99,3 +99,17 @@ test("facts from the newer resume are retrievable", () => {
   assert.match(text("Does he know Contentful?"), /Contentful/);
   assert.equal(route("Has he built an MCP server?", chunks), "answer");
 });
+
+test("work-history questions get every role, not just the named company", () => {
+  for (const q of ["Where did he work before Amplon?", "What was his previous job?", "Which companies has he worked at?"]) {
+    const text = retrieve(q, chunks).map((c) => c.text).join(" ");
+    assert.match(text, /TechQuest/, q);
+    assert.match(text, /Exitech/, q);
+    assert.match(text, /MRS Technologies/, q);
+  }
+});
+
+test("'before' about a tool keeps the tool's lines", () => {
+  const s = retrieve("Has he used Terraform before?", chunks).map((c) => c.text).join(" ");
+  assert.match(s, /Terraform/);
+});

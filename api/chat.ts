@@ -1,7 +1,7 @@
 // POST /api/chat: answers one question about Haroon through OpenAI (or OpenRouter's
 // free models as a fallback). API keys stay on the server, and the server builds the
 // prompt itself, so the endpoint can't be used as a general-purpose LLM.
-import { DONT_KNOW, OFF_TOPIC, parseChunks, retrieve, route, terms, type Chunk } from "../src/retrieve.js";
+import { DONT_KNOW, OFF_TOPIC, parseChunks, retrieve, route, terms, type Chunk, isWorkHistory } from "../src/retrieve.js";
 import { systemPrompt } from "../src/prompt.js";
 import { resumeMarkdown } from "../src/profile.js";
 import { fallbackReason, semanticSearch } from "./_lib/vector.js";
@@ -79,7 +79,8 @@ async function retrieveContext(question: string, history: Turn[]): Promise<Conte
   const semanticTexts = new Set(close.map((c) => c.text));
   const agreed = keyword.filter((k) => semanticTexts.has(k.text));
   return {
-    lines: broad ? [] : dedupe([...agreed, ...close, ...keyword]).slice(0, 8),
+    // Work-history questions keep every role line ahead of the closest semantic matches.
+    lines: broad ? [] : isWorkHistory(question) ? dedupe([...keyword, ...close]).slice(0, 10) : dedupe([...agreed, ...close, ...keyword]).slice(0, 8),
     answerable: route(question, chunks) === "answer" || best >= MIN_SCORE,
     mode: "vector",
   };
