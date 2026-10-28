@@ -9,7 +9,7 @@ test("faithful answers pass", () => {
   for (const a of [
     "Haroon has experience with AWS services such as EC2, S3, Amplify, Bedrock, SageMaker.",
     "Haroon has a Master's degree in Information Technology (Computer Engineering) from Åbo Akademi University and a Bachelor's degree in Computer Science from FAST-NUCES.",
-    "Yes, Haroon has led a team of 6 software engineers at QUEST I-8.",
+    "Yes, Haroon has led a team of 6 software engineers at TechQuest.",
     "I don't know. That isn't in Haroon's resume. You could ask him at haroonriasatali@gmail.com.",
   ]) assert.ok(isGrounded(a, resume, "q"), a);
 });

@@ -86,7 +86,7 @@ test("short invented strengths are caught; honest gap notes that echo the ad are
   const ad = "Must know Azure DevOps and Go.";
   const fit = parseFit(
     answer([
-      { requirement: "Go", level: "partial", evidence: "He has five years of Rust and WebAssembly experience at Google." },
+      { requirement: "Go", level: "partial", evidence: "He has five years of Rust and WebAssembly experience at Netflix." },
       { requirement: "Azure DevOps", level: "gap", evidence: "He has used Jira and CI/CD on AWS rather than Azure DevOps." },
       { requirement: "AWS", level: "strong", evidence: "His resume shows hands-on AWS work across EC2, S3, Amplify and Bedrock." },
     ]),
